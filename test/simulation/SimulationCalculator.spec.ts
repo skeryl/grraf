@@ -23,4 +23,25 @@ describe('SimulationCalculator', () => {
         expect(particleStep.acceleration).toEqual({ x: 0, y: 0 });
     });
 
+    test('should calculate distance travelled after 1000 ms correctly', () => {
+
+        const env: Environment = getTestEnvironment();
+
+        const particle = env.createParticle({
+            position: {x: 0, y: 0},
+            initialVelocity: {x: 5, y: 0},
+            mass: 200
+        });
+
+        const simulationCalculator = new SimulationCalculator(env);
+
+
+        const atOneSecond = simulationCalculator.calculate(1000);
+
+        const particleStep = atOneSecond[particle.id];
+
+        expect(particleStep.velocity).toEqual({x: 5, y: 0});
+        expect(particleStep.position).toEqual({x: 5, y: 0});
+    });
+
 });

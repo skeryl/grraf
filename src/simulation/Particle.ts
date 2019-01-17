@@ -1,31 +1,23 @@
 import {Shape} from "../shapes/Shape";
 import {Circle} from "../shapes/Circle";
-import {add, Direction, DirectionalMagnitude, PhysicalProperties, ZERO} from "./Simulation";
+import {PhysicalProperties} from "./Simulation";
 import {Environment, NearbyParticle} from "./Environment";
 import {Coordinates} from "../Coordinates";
+import {add, Direction, DirectionalMagnitude, ZERO} from "./DirectionalMagnitude";
 
 export interface Collision {
     force: DirectionalMagnitude;
     particle: NearbyParticle;
 }
 
-export function negative(value: DirectionalMagnitude) {
-    return {
-        x: -value.x,
-        y: -value.y,
-    };
-}
-
 export interface IParticle {
 
-    readonly environment: Environment;
-
     readonly id: number;
+    readonly environment: Environment;
     readonly physicalProperties: PhysicalProperties;
     readonly position: DirectionalMagnitude;
     readonly acceleration: DirectionalMagnitude;
     readonly velocity: DirectionalMagnitude;
-
 
     addForce(force: DirectionalMagnitude): void;
     resolveForces(): DirectionalMagnitude;

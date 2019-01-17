@@ -1,6 +1,6 @@
 import {GravitationalConstant} from "./constants";
-import {IParticle, Particle} from "./Particle";
-import {Direction, DirectionalMagnitude} from "./Simulation";
+import {IParticle} from "./Particle";
+import {Direction, DirectionalMagnitude} from "./DirectionalMagnitude";
 import {NearbyParticle} from "./Environment";
 
 export type Distance = DirectionalMagnitude & {
@@ -10,6 +10,7 @@ export type Distance = DirectionalMagnitude & {
 export function distanceBetween(particleA: IParticle, particleB: IParticle): Distance {
     const xDistance = particleA.position.x - particleB.position.x;
     const yDistance = particleA.position.x - particleB.position.y;
+    // noinspection JSSuspiciousNameCombination
     return {
         [Direction.x]: xDistance,
         [Direction.y]: yDistance,

@@ -1,6 +1,6 @@
-import { FixedPool } from "./FixedPool";
-import { Coordinates } from "./Coordinates";
-import {add, DirectionalMagnitude, ZERO} from "./simulation/Simulation";
+import {FixedPool} from "./FixedPool";
+import {Coordinates} from "./Coordinates";
+import {add, DirectionalMagnitude, ZERO} from "./simulation/DirectionalMagnitude";
 
 function delta(a: number, b: number, timeMS: number): number {
     return (a - b) / timeMS;

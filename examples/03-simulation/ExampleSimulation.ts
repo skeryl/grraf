@@ -2,9 +2,9 @@ import {Example} from "../index";
 import {Stage} from "../../src/Stage";
 import {Circle} from "../../src/shapes/Circle";
 import {Color} from "../../src/Color";
-import {Animation, TimingFunction} from "../../src/Animation";
-import {Direction, DirectionalMagnitude, Simulation} from "../../src/simulation/Simulation";
+import {Simulation} from "../../src/simulation/Simulation";
 import {Environment} from "../../src/simulation/Environment";
+import {Direction} from "../../src/simulation/DirectionalMagnitude";
 
 const sexyPink = new Color(247, 24, 120);
 const royalBlue = new Color(20, 20, 255);

@@ -1,10 +1,11 @@
-import {IParticle, negative, Particle} from "./Particle";
+import {IParticle, Particle} from "./Particle";
 import {Distance, Stage} from "../Stage";
 import {Shape} from "../shapes/Shape";
 import {Circle} from "../shapes/Circle";
-import {Direction, DirectionalMagnitude, PhysicalProperties, ZERO} from "./Simulation";
+import {PhysicalProperties} from "./Simulation";
 import {gravitationalForce} from "./calculations";
 import {ForceLine} from "./ForceLine";
+import {Direction, DirectionalMagnitude, equals, negative, ZERO} from "./DirectionalMagnitude";
 
 export interface EnvironmentalProperties {
     coefficientOfFriction: number;
@@ -56,8 +57,14 @@ export class Environment {
             mass: 10,
             initialVelocity: ZERO,
             initialAcceleration: ZERO,
+            position: shape.position,
             ...props,
         };
+
+        if (!equals(physicalProperties.position, shape.position)) {
+            shape.setPosition(physicalProperties.position);
+        }
+
         const particle = new Particle(this, physicalProperties, shape);
         this.particles.push(particle);
         this.particlesByShape[shape.id] = particle;

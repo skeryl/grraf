@@ -1,40 +1,17 @@
 import {Timer} from "../Timer";
 import {Environment, NearbyParticle} from "./Environment";
-import {Particle} from "./Particle";
 import {SimulationBuffer} from "./SimulationCalculator";
-
-export enum Direction {
-    x = "x",
-    y = "y",
-}
-
-export type DirectionalMagnitude = { [dir in Direction]: number };
-export const ZERO: DirectionalMagnitude = { x: 0, y: 0 };
-
-export function add(magnitudeA: DirectionalMagnitude, magnitudeB: DirectionalMagnitude): DirectionalMagnitude {
-    return {
-        x: magnitudeA.x + magnitudeB.x,
-        y: magnitudeA.y + magnitudeB.y
-    };
-}
-
-export function subtract(magnitudeA: DirectionalMagnitude, magnitudeB: DirectionalMagnitude): DirectionalMagnitude {
-    return {
-        x: magnitudeA.x - magnitudeB.x,
-        y: magnitudeA.y - magnitudeB.y
-    };
-}
+import {DirectionalMagnitude} from "./DirectionalMagnitude";
 
 export interface PhysicalProperties {
     mass: number;
+    position: DirectionalMagnitude;
     initialAcceleration: DirectionalMagnitude;
     initialVelocity: DirectionalMagnitude
     coefficientOfFriction?: number;
 }
 
 export type TickHandler = (timeSeconds: number, environment: Environment) => void;
-
-
 
 export type NearbyParticleMap = {
     [particleId: number]: NearbyParticle;

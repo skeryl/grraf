@@ -1,7 +1,7 @@
 import {Environment, ForceMap, NearbyParticle} from "./Environment";
-import {add, Direction, DirectionalMagnitude, NearbyParticleMap, ParticleMatrix, ZERO} from "./Simulation";
-import {pathMatch} from "tough-cookie";
+import {NearbyParticleMap, ParticleMatrix} from "./Simulation";
 import {IParticle} from "./Particle";
+import {add, Direction, DirectionalMagnitude, ZERO} from "./DirectionalMagnitude";
 
 type ParticleStep = {
     netForce: DirectionalMagnitude;
@@ -59,8 +59,8 @@ export class SimulationBuffer {
                 this.calculator.calculate(timeStamp);
                 this.lastComputed = timeStamp;
             }
+            this.tick();
         }
-        this.tick();
     }
 
     public calculate(time: number): StepResult {

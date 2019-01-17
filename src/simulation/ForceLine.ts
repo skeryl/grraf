@@ -1,5 +1,5 @@
 import {Shape} from "../shapes/Shape";
-import {Particle} from "./Particle";
+import {IParticle, Particle} from "./Particle";
 import {Distance, Stage} from "../Stage";
 import {Color} from "../Color";
 import {Path} from "../shapes/Path";
@@ -11,8 +11,8 @@ export class ForceLine extends Shape {
 
     private readonly line: Path;
 
-    private particleA: Particle | undefined;
-    private particleB: Particle | undefined;
+    private particleA: IParticle | undefined;
+    private particleB: IParticle | undefined;
     private distance: Distance | undefined;
 
     constructor(stage: Stage, id: number, context: CanvasRenderingContext2D, x: number, y: number, color: Color) {
@@ -42,8 +42,8 @@ export class ForceLine extends Shape {
                 y: this.particleB.y + (distance.y/2)
             });*/
 
-            this.line.moveTo(this.particleA.x, this.particleA.y);
-            this.line.lineTo(this.particleB.x, this.particleB.y);
+            this.line.moveTo(this.particleA.position.x, this.particleA.position.y);
+            this.line.lineTo(this.particleB.position.x, this.particleB.position.y);
             this.line.drawShape();
         }
     }

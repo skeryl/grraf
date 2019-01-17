@@ -1,7 +1,7 @@
 import {Color} from "../Color";
 import {Coordinates} from "../Coordinates";
 import {MouseCallback, Stage} from "../Stage";
-import {DirectionalMagnitude} from "../simulation/Simulation";
+import {DirectionalMagnitude} from "../simulation/DirectionalMagnitude";
 
 export class SizeStrategy {
 

@@ -1,5 +1,3 @@
-import {Color} from "../Color";
-import {MouseInfo} from "../Mouse";
 import {Shape} from "./Shape";
 import {Coordinates} from "../Coordinates";
 

@@ -4,7 +4,7 @@ import {MouseInfo} from "./Mouse";
 import {ShapeStore} from "./ShapeStore";
 import {Coordinates} from "./Coordinates";
 import {AnimationBuilder} from "./Animation";
-import {DirectionalMagnitude} from "./simulation/Simulation";
+import {DirectionalMagnitude} from "./simulation/DirectionalMagnitude";
 
 
 export type Distance = DirectionalMagnitude & {

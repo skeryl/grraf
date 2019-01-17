@@ -3,7 +3,7 @@ import {Stage} from "../../src/Stage";
 import {Rectangle} from "../../src/shapes/Rectangle";
 import {Color} from "../../src/Color";
 import {Path} from "../../src/shapes/Path";
-import {DirectionalMagnitude} from "../../src/simulation/Simulation";
+import {DirectionalMagnitude} from "../../src/simulation/DirectionalMagnitude";
 
 const NUM_ROWS = 30;
 const NUM_COLS = 100;

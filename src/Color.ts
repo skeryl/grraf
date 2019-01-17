@@ -1,4 +1,4 @@
-import { Animation } from "./Animation";
+import {Animation} from "./Animation";
 
 function wAvg(a: number, b: number, weight: number): number {
     const weightForA = (1 - weight);
