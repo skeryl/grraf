@@ -1,0 +1,41 @@
+
+body {
+    margin: 0;
+    overflow: hidden;
+}
+
+#main {
+    z-index: -1;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+#example-selection-bar {
+    width: 100%;
+    height: 5rem;
+    padding: 0.1rem;
+    opacity: 0.6;
+
+    transition: opacity 200ms ease-in-out;
+}
+
+#example-selection-bar:hover {
+    opacity: 1;
+}
+
+
+#example-selection-bar label {
+    padding-top: 10px;
+    padding-left: 20px;
+}
+
+#examples-select {
+    font-size: 1em;
+}
+
+#example-container {
+    position: absolute;
+    top: 100px;
+    left: 25%;
+}
