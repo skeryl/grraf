@@ -34,26 +34,34 @@ export class Simulation {
     private timer: Timer = new Timer();
     private tickHandler: TickHandler = () => {};
 
-    private readonly calculations = new SimulationBuffer(this.environment);
+    private readonly calculations = new SimulationBuffer(this.environment, 1);
 
     constructor(
         public readonly environment: Environment
     ){
     }
 
+    public scaledTotalMilliseconds = (): number => {
+        return this._timeMilliseconds*this.speed;
+    };
+
     public time = (): number => {
         return this._timeMilliseconds - this._lastTick;
     };
 
     public secondsFromLastTick = () => {
-        return (this.time()/1000)*this.speed;
+        return this.milliSecondsFromLastTick()/1000;
+    };
+
+    public milliSecondsFromLastTick = () => {
+        return (this.time());
     };
 
     private tick = (): void => {
         if(this.running){
             this._timeMilliseconds = this.timer.elapsed;
 
-            const stepResult = this.calculations.calculate(this.secondsFromLastTick());
+            const stepResult = this.calculations.calculate(this.scaledTotalMilliseconds());
 
             Object.keys(stepResult).forEach(particleId => {
 

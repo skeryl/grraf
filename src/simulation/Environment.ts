@@ -5,7 +5,7 @@ import {Circle} from "../shapes/Circle";
 import {PhysicalProperties} from "./Simulation";
 import {gravitationalForce} from "./calculations";
 import {ForceLine} from "./ForceLine";
-import {Direction, DirectionalMagnitude, equals, negative, ZERO} from "./DirectionalMagnitude";
+import {Direction, DirectionalMagnitude, equals, ZERO} from "./DirectionalMagnitude";
 
 export interface EnvironmentalProperties {
     coefficientOfFriction: number;
@@ -75,6 +75,7 @@ export class Environment {
 
         const friction = this.properties.coefficientOfFriction;
 
+        // noinspection JSSuspiciousNameCombination
         return {
             [Direction.x]: acceleration.x += (-1 * Math.sign(acceleration.x)) * friction,
             [Direction.y]: acceleration.y += (-1 * Math.sign(acceleration.y)) * friction,
@@ -111,50 +112,25 @@ export class Environment {
             if(!(p.id in forces)){
                 forces[p.id] = [];
             }
-            forces[p.id].push(this.gravitationalForceOn(particle, nearbyParticle));
+            forces[p.id].push(Environment.gravitationalForceOn(particle, nearbyParticle));
         });
 
         return { nearby, forces };
     }
 
 
-    private gravitationalForceOn(particle: Particle, nearbyParticle: NearbyParticle) {
+    private static gravitationalForceOn(particle: Particle, nearbyParticle: NearbyParticle) {
 
         const angleX = Math.asin(nearbyParticle.distance.x / nearbyParticle.distance.total);
         const angleY = Math.acos(nearbyParticle.distance.y / nearbyParticle.distance.total);
 
         const forceTotal = gravitationalForce(particle, nearbyParticle);
 
+        // noinspection JSSuspiciousNameCombination
         return {
             x: Math.sin(angleX) * forceTotal,
             y: Math.cos(angleY) * forceTotal,
         };
-    }
-
-    private addCollisionForces(particle: Particle, nearby: NearbyParticle) {
-        const theta = Math.atan(particle.velocity.x / particle.velocity.y);
-
-        const boundaryTowardsNearby = particle.boundary(theta);
-        const boundaryAtIntersect = nearby.particle.boundary((Math.PI) - theta);
-
-        const xDiff = Math.abs(boundaryTowardsNearby.x - boundaryAtIntersect.x);
-        const yDiff = Math.abs(boundaryTowardsNearby.y - boundaryAtIntersect.y);
-
-        if(xDiff <= 1 && yDiff <= 1){
-            const halfMass = 0.5*particle.physicalProperties.mass;
-            const x = particle.velocity.x;
-            const y = particle.velocity.y;
-            const xMetersPerSecond = this.pixelsToMeters(x);
-            const yMetersPerSecond = this.pixelsToMeters(y);
-            const force = {
-                x: (halfMass*(Math.pow(x, 2)))*100 /* / this.pixelsToMeters(xDiff)*/,
-                y: (halfMass*(Math.pow(y, 2)))*100 /* / this.pixelsToMeters(yDiff)*/,
-            };
-            nearby.particle.addForce(force);
-            particle.addForce(negative(force));
-
-            console.log("collision!!!", force, )
-        }
     }
 
     private ensureForceLineExists = (particleA: Particle, particleB: NearbyParticle) => {

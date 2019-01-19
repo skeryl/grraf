@@ -1,7 +1,8 @@
 import {Environment, ForceMap, NearbyParticle} from "./Environment";
 import {NearbyParticleMap, ParticleMatrix} from "./Simulation";
-import {IParticle} from "./Particle";
-import {add, Direction, DirectionalMagnitude, ZERO} from "./DirectionalMagnitude";
+import {IParticle, Particle} from "./Particle";
+import {add, Direction, DirectionalMagnitude, negative, ZERO} from "./DirectionalMagnitude";
+import {ScalingMap} from "./ScalingMap";
 
 type ParticleStep = {
     netForce: DirectionalMagnitude;
@@ -80,10 +81,9 @@ export class SimulationBuffer {
 
 }
 
-
 export class SimulationCalculator {
 
-    private stepCache: Map<number, StepResult> = new Map<number, StepResult>();
+    private stepCache: ScalingMap<number, StepResult> = new ScalingMap<number, StepResult>();
 
     constructor(
         private readonly environment: Environment,
@@ -121,6 +121,8 @@ export class SimulationCalculator {
             .reduce((result: StepResult, particleId: string) => {
 
                     const particle = this.environment.getParticle(particleId);
+
+                    const collisions  = this.getCollisions(particle, nearbyMatrix);
 
                     const netForce = (particleId in forces) ? forces[particleId].reduce(add, ZERO) : ZERO;
 
@@ -200,5 +202,36 @@ export class SimulationCalculator {
             velocity: particle.physicalProperties.initialVelocity,
             position: particle.position,
         };
+    }
+
+    private collisionCheck(particle: Particle, nearby: NearbyParticle) {
+        const theta = Math.atan(particle.velocity.x / particle.velocity.y);
+
+        const boundaryTowardsNearby = particle.boundary(theta);
+        const boundaryAtIntersect = nearby.particle.boundary((Math.PI) - theta);
+
+        const xDiff = Math.abs(boundaryTowardsNearby.x - boundaryAtIntersect.x);
+        const yDiff = Math.abs(boundaryTowardsNearby.y - boundaryAtIntersect.y);
+
+        if(xDiff <= 1 && yDiff <= 1){
+            const halfMass = 0.5*particle.physicalProperties.mass;
+            const x = particle.velocity.x;
+            const y = particle.velocity.y;
+            const xMetersPerSecond = this.environment.pixelsToMeters(x);
+            const yMetersPerSecond = this.environment.pixelsToMeters(y);
+            // noinspection JSSuspiciousNameCombination
+            const force = {
+                x: (halfMass*(Math.pow(x, 2)))*100 /* / this.pixelsToMeters(xDiff)*/,
+                y: (halfMass*(Math.pow(y, 2)))*100 /* / this.pixelsToMeters(yDiff)*/,
+            };
+            nearby.particle.addForce(force);
+            particle.addForce(negative(force));
+
+            console.log("collision!!!", force, )
+        }
+    }
+
+    private getCollisions(particle: IParticle, nearbyMatrix: ParticleMatrix) {
+        // ToDo: implement. map over nearby particles, check for collisions, figure out how to return/apply particles
     }
 }

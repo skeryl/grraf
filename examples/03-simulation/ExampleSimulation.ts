@@ -28,7 +28,6 @@ export class ExampleSimulation implements Example {
         });
 
         this.simulation = new Simulation(env);
-/*
         this.simulation.environment.createParticle({
                 mass: 5, // mass of human
                 initialVelocity: {
@@ -74,36 +73,18 @@ export class ExampleSimulation implements Example {
             this.stage.createShape(Circle).setRadius(5)
                 .setPosition({ x: 300, y: 800})
                 .setColor(royalBlue),
-        );*/
+        );
 
-        const earth = this.simulation.environment.createParticle({
+        this.simulation.environment.createParticle({
                 mass: (6 * Math.pow(10,23)), // mass of earth
-                initialVelocity: {
-                    x: 0,
-                    y: 0,
-                }
             },
             this.stage.createShape(Circle)
-                .setRadius(50)
+                .setRadius(20)
                 .setPosition({ x: window.innerWidth / 2, y: window.innerHeight / 2 })
                 .setColor(royalBlue)
         );
 
-        const earth2 = this.simulation.environment.createParticle({
-                mass: (6 * Math.pow(10,23)), // mass of earth
-                initialVelocity: {
-                    x: 0,
-                    y: 0,
-                }
-            },
-            this.stage.createShape(Circle)
-                .setRadius(50)
-                .setPosition({ x: window.innerWidth / 2, y: earth.y - 105 })
-                .setColor(orangeJuice)
-        );
-
-        //this.simulation.environment.stage.scale(0.5, 0.5);
-        this.simulation.setSpeed(0.5);
+        this.simulation.setSpeed(2);
 
         this.simulation.start();
     }
