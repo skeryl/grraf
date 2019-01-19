@@ -126,28 +126,37 @@ export class SimulationCalculator {
 
                     const previous = SimulationCalculator.getPreviousState(lastStep, particle);
 
-                    const acceleration = {
-                        x: (netForce[Direction.x] / particle.physicalProperties.mass),
-                        y: (netForce[Direction.y] / particle.physicalProperties.mass),
-                    };
+                    if(timeStamp === 0){
+                        result[particleId] = {
+                            netForce: ZERO,
+                            velocity: previous.velocity,
+                            acceleration: previous.acceleration,
+                            position: previous.position
+                        };
+                    } else {
 
-                    const velocity = {
-                        x: previous.velocity.x + (acceleration.x * this.stepTimeMilliseconds),
-                        y: previous.velocity.y + (acceleration.y * this.stepTimeMilliseconds),
-                    };
+                        const acceleration = {
+                            x: (netForce[Direction.x] / particle.physicalProperties.mass),
+                            y: (netForce[Direction.y] / particle.physicalProperties.mass),
+                        };
 
-                    const position = {
-                        x: previous.position.x + (velocity.x * this.stepTimeMilliseconds),
-                        y: previous.position.y + (velocity.y * this.stepTimeMilliseconds),
-                    };
+                        const velocity = {
+                            x: previous.velocity.x + (acceleration.x * this.stepTimeSeconds),
+                            y: previous.velocity.y + (acceleration.y * this.stepTimeSeconds),
+                        };
 
-                    result[particleId] = {
-                        netForce,
-                        velocity,
-                        acceleration,
-                        position
-                    };
+                        const position = {
+                            x: previous.position.x + (velocity.x * this.stepTimeSeconds),
+                            y: previous.position.y + (velocity.y * this.stepTimeSeconds),
+                        };
 
+                        result[particleId] = {
+                            netForce,
+                            velocity,
+                            acceleration,
+                            position
+                        };
+                    }
                     return result;
                 },
                 {}
@@ -170,6 +179,10 @@ export class SimulationCalculator {
 
         return calculateStep;
 
+    }
+
+    get stepTimeSeconds():number {
+        return this.stepTimeMilliseconds / 1_000;
     }
 
     private static getPreviousState(lastStep: StepResult | null, particle: IParticle): ParticleStep {
