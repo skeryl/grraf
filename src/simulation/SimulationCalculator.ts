@@ -1,7 +1,6 @@
 import {Environment, ForceMap, NearbyParticle} from "./Environment";
-import {NearbyParticleMap, ParticleMatrix} from "./Simulation";
 import {IParticle, Particle} from "./Particle";
-import {add, Direction, DirectionalMagnitude, negative, ZERO} from "./DirectionalMagnitude";
+import {add, Direction, DirectionalMagnitude, ZERO} from "./DirectionalMagnitude";
 import {ScalingMap} from "./ScalingMap";
 
 type ParticleStep = {
@@ -14,6 +13,25 @@ type ParticleStep = {
 type StepResult = {
     [particleId: string]: ParticleStep
 };
+
+export type NearbyParticleMap = {
+    [particleId: number]: NearbyParticle;
+};
+
+export type ParticleMatrix = {
+    particles: { [particleId: number]: NearbyParticleMap };
+    collisions: CollisionMap;
+    forces: ForceMap;
+};
+
+type CollisionMap = {
+    [particlesId: string]: { [particleId: string]: Collision };
+}
+
+interface SimulationStep {
+    particles: StepResult;
+    collisions: CollisionMap;
+}
 
 type StepIncrements = 1 | 10 | 20 | 50 | 100 | 1000;
 
@@ -29,7 +47,7 @@ export class SimulationBuffer {
 
     private running: boolean = false;
 
-    private readonly calculator: SimulationCalculator = new SimulationCalculator(this.environment, this.stepTimeMilliseconds);
+    private readonly calculator: SimulationCalculator = new SimulationCalculator(this.environment, this.stepTimeMilliseconds, 2 * (this.bufferMilliseconds / this.stepTimeMilliseconds ));
 
     constructor(
         private readonly environment: Environment,
@@ -64,11 +82,10 @@ export class SimulationBuffer {
         }
     }
 
-    public calculate(time: number): StepResult {
+    public calculate(time: number): SimulationStep {
         this.lastRequested = time;
         return this.calculator.calculate(time);
     }
-
 
     /*private preBuffer() {
         return new Promise<void>(resolve => {
@@ -81,95 +98,183 @@ export class SimulationBuffer {
 
 }
 
+export function toShallowParticle(particle: Particle): IParticle {
+    return {
+        id: particle.id,
+        physicalProperties: particle.physicalProperties,
+        acceleration: {...particle.acceleration},
+        velocity: {...particle.velocity},
+        position: { ...particle.position },
+        environment: particle.environment,
+        boundary(position: DirectionalMagnitude, theta: number): DirectionalMagnitude {
+            return particle.boundary(position, theta);
+        }
+    };
+}
+
+type ParticlesById = { [particleId: string]: IParticle };
+
 export class SimulationCalculator {
 
-    private stepCache: ScalingMap<number, StepResult> = new ScalingMap<number, StepResult>();
+    private stepCache: ScalingMap<number, SimulationStep> = new ScalingMap<number, SimulationStep>(this.cacheSize);
+    // private particles: ParticlesById;
 
     constructor(
         private readonly environment: Environment,
         private readonly stepTimeMilliseconds: StepIncrements = 50,
+        private readonly cacheSize: number = 5000,
     ){
+       /* this.particles = environment.particles
+            .map(toShallowParticle)
+            .reduce((result: ParticlesById, particle: IParticle) => {
+                result[particle.id.toString()] = particle;
+                return result;
+            },
+            {} as ParticlesById
+            );*/
+    }
+
+    private getInitialState(): SimulationStep {
+        return Object.keys(this.environment.particles).reduce((result: SimulationStep, particleId: string) => {
+
+            const particle = this.environment.getParticle(particleId);
+
+            result.particles[particleId] = {
+                netForce: ZERO,
+                velocity: particle.physicalProperties.initialVelocity,
+                acceleration: particle.physicalProperties.initialAcceleration,
+                position: particle.physicalProperties.position,
+            };
+
+            return result;
+        }, {
+            particles: {},
+            collisions: {},
+        });
     }
 
     // return a Map from particle ID to the "things to do" to the particle at that moment in time
-    private calculateStep(timeStamp: number): StepResult | null {
-
-        if(timeStamp < 0){
-            return null;
+    private calculateStep(timeStamp: number): SimulationStep {
+        if(this.stepCache.has(timeStamp)){
+            return this.stepCache.get(timeStamp) as SimulationStep;
         }
 
-        if(this.stepCache.has(timeStamp)){
-            return this.stepCache.get(timeStamp) as StepResult;
+        console.log(`calc: ${timeStamp}`);
+
+        if(timeStamp <= 0){
+            const initialState = this.getInitialState();
+            this.stepCache.set(0, initialState);
+            return initialState;
         }
 
         const lastStep = this.calculateStep(timeStamp - this.stepTimeMilliseconds);
 
-        const forces: ForceMap = {};
+        const particleMatrix: ParticleMatrix = Object.values(this.environment.particles).reduce((result: ParticleMatrix, particle) => {
 
-        const nearbyMatrix: ParticleMatrix = this.environment.particles.reduce((result: ParticleMatrix, particle) => {
+            const { nearby } = this.environment.recalculateParticleForces(particle, result.forces);
 
-            const { nearby } = this.environment.recalculateParticleForces(particle, forces);
+            result.particles[particle.id] = nearby.reduce((info: NearbyParticleMap, nearby: NearbyParticle) => {
 
-            result[particle.id] = nearby.reduce((map: NearbyParticleMap, nearby: NearbyParticle) => {
-                map[nearby.particle.id] = nearby;
-                return map;
-            }, {});
-            return result;
-        }, {});
+                info[nearby.particle.id] = nearby;
 
-        const stepResult = Object.keys(nearbyMatrix)
-            .reduce((result: StepResult, particleId: string) => {
-
-                    const particle = this.environment.getParticle(particleId);
-
-                    const collisions  = this.getCollisions(particle, nearbyMatrix);
-
-                    const netForce = (particleId in forces) ? forces[particleId].reduce(add, ZERO) : ZERO;
-
-                    const previous = SimulationCalculator.getPreviousState(lastStep, particle);
-
-                    if(timeStamp === 0){
-                        result[particleId] = {
-                            netForce: ZERO,
-                            velocity: previous.velocity,
-                            acceleration: previous.acceleration,
-                            position: previous.position
-                        };
-                    } else {
-
-                        const acceleration = {
-                            x: (netForce[Direction.x] / particle.physicalProperties.mass),
-                            y: (netForce[Direction.y] / particle.physicalProperties.mass),
-                        };
-
-                        const velocity = {
-                            x: previous.velocity.x + (acceleration.x * this.stepTimeSeconds),
-                            y: previous.velocity.y + (acceleration.y * this.stepTimeSeconds),
-                        };
-
-                        const position = {
-                            x: previous.position.x + (velocity.x * this.stepTimeSeconds),
-                            y: previous.position.y + (velocity.y * this.stepTimeSeconds),
-                        };
-
-                        result[particleId] = {
-                            netForce,
-                            velocity,
-                            acceleration,
-                            position
-                        };
+                if(!SimulationCalculator.collisionAlreadyReported(result.collisions, particle, nearby.particle)){
+                    const possibleCollision = SimulationCalculator.collisionCheck(lastStep, particle, nearby.particle);
+                    if(possibleCollision){
+                        SimulationCalculator.addCollision(result.collisions, possibleCollision);
                     }
-                    return result;
-                },
-                {}
-            );
+                }
+
+                return info;
+            }, {
+            });
+
+            return result;
+        }, {
+            particles: {},
+            collisions: {},
+            forces: {},
+        });
+
+        const stepResult = Object.keys(particleMatrix.particles)
+            .reduce((result: SimulationStep, particleId: string) => {
+
+                const particle = this.environment.getParticle(particleId);
+
+                const collisionVelocity = this.getCollisionVelocity(particle.id, particleMatrix);
+
+                const netForce = (particleId in particleMatrix.forces) ? particleMatrix.forces[particleId].reduce(add, ZERO) : ZERO;
+
+                const previous = SimulationCalculator.getPreviousState(lastStep, particle);
+
+                const seconds = this.stepTimeSeconds;
+
+                const acceleration = collisionVelocity ? ZERO : SimulationCalculator.getAcceleration(netForce, particle);
+
+                const velocity = collisionVelocity ? collisionVelocity : SimulationCalculator.getUpdatedVelocity(previous, acceleration, seconds);
+
+                const position = SimulationCalculator.getUpdatedPosition(previous, velocity, seconds);
+
+                result.particles[particleId] = {
+                    netForce,
+                    acceleration,
+                    velocity,
+                    position
+                };
+
+                return result;
+            },
+            {
+                particles: {},
+                collisions: particleMatrix.collisions,
+            });
 
         this.stepCache.set(timeStamp, stepResult);
 
         return stepResult;
     }
 
-    public calculate(millisFromStart: number): StepResult {
+    private getCollisionVelocity(particleId: number, particleMatrix: ParticleMatrix): DirectionalMagnitude | undefined {
+        if (particleId in particleMatrix.collisions) {
+            const particleCollisions = particleMatrix.collisions[particleId];
+            return Object.values(particleCollisions).reduce((velocity, collision) => {
+                return add(velocity, collision[particleId]);
+            }, ZERO);
+        }
+        return undefined;
+    }
+
+    private static collisionAlreadyReported(info: CollisionMap, particle: IParticle, nearby: IParticle): boolean {
+        if (nearby.id in info) {
+            const othersCollisions = info[nearby.id];
+            if (particle.id in othersCollisions) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static getAcceleration(netForce: DirectionalMagnitude, particle: IParticle) {
+        return {
+            x: (netForce[Direction.x] / particle.physicalProperties.mass),
+            y: (netForce[Direction.y] / particle.physicalProperties.mass),
+        };
+    }
+
+    private static getUpdatedVelocity(previous: ParticleStep, acceleration: DirectionalMagnitude, seconds: number) {
+        return {
+            x: previous.velocity.x + (acceleration.x * seconds),
+            y: previous.velocity.y + (acceleration.y * seconds),
+        };
+    }
+
+    private static getUpdatedPosition(previous: ParticleStep, velocity: DirectionalMagnitude, seconds: number) {
+        return {
+            x: previous.position.x + (velocity.x * seconds),
+            y: previous.position.y + (velocity.y * seconds),
+        };
+    }
+
+    public calculate(millisFromStart: number): SimulationStep {
 
         const timeStamp = nearestIncrement(millisFromStart, this.stepTimeMilliseconds);
 
@@ -187,10 +292,10 @@ export class SimulationCalculator {
         return this.stepTimeMilliseconds / 1_000;
     }
 
-    private static getPreviousState(lastStep: StepResult | null, particle: IParticle): ParticleStep {
+    private static getPreviousState(lastStep: SimulationStep | null, particle: IParticle): ParticleStep {
 
         if(lastStep){
-            const particleStep = lastStep[particle.id];
+            const particleStep = lastStep.particles[particle.id];
             if(particleStep){
                 return particleStep;
             }
@@ -204,34 +309,66 @@ export class SimulationCalculator {
         };
     }
 
-    private collisionCheck(particle: Particle, nearby: NearbyParticle) {
-        const theta = Math.atan(particle.velocity.x / particle.velocity.y);
+    private static collisionCheck(lastStep: SimulationStep, particle: IParticle, other: IParticle): Collision | undefined {
+        if (this.hasCollision(lastStep, particle, other)) {
+            return this.calculateCollision(particle, other);
+        }
+        return undefined;
+    }
 
-        const boundaryTowardsNearby = particle.boundary(theta);
-        const boundaryAtIntersect = nearby.particle.boundary((Math.PI) - theta);
+    private static hasCollision(lastStep: SimulationStep, particleA: IParticle, particleB: IParticle): Boolean {
+
+        const aData = lastStep.particles[particleA.id];
+        const bData = lastStep.particles[particleB.id];
+
+        const theta = (Math.PI/2) - (Math.atan(aData.velocity.x / aData.velocity.y));
+
+        const boundaryTowardsNearby = particleA.boundary(aData.position, theta);
+        const boundaryAtIntersect = particleB.boundary(bData.position, (Math.PI) - theta);
 
         const xDiff = Math.abs(boundaryTowardsNearby.x - boundaryAtIntersect.x);
         const yDiff = Math.abs(boundaryTowardsNearby.y - boundaryAtIntersect.y);
+        return xDiff <= 1 && yDiff <= 1;
+    }
 
-        if(xDiff <= 1 && yDiff <= 1){
-            const halfMass = 0.5*particle.physicalProperties.mass;
-            const x = particle.velocity.x;
-            const y = particle.velocity.y;
-            const xMetersPerSecond = this.environment.pixelsToMeters(x);
-            const yMetersPerSecond = this.environment.pixelsToMeters(y);
-            // noinspection JSSuspiciousNameCombination
-            const force = {
-                x: (halfMass*(Math.pow(x, 2)))*100 /* / this.pixelsToMeters(xDiff)*/,
-                y: (halfMass*(Math.pow(y, 2)))*100 /* / this.pixelsToMeters(yDiff)*/,
-            };
-            nearby.particle.addForce(force);
-            particle.addForce(negative(force));
+    private static calculateCollision(p1: IParticle, p2: IParticle): Collision {
+        const m1 = p1.physicalProperties.mass;
+        const m2 = p2.physicalProperties.mass;
 
-            console.log("collision!!!", force, )
+        const v1 = p1.velocity;
+        const v2 = p2.velocity;
+
+        const combinedMass = m1 + m2;
+        const massDifference = m1 - m2;
+
+        return {
+            [p1.id]: {
+                x: (((massDifference) * v1.x) / (combinedMass)) + ((2 * m2 * v2.x) / (combinedMass)),
+                y: (((massDifference) * v1.y) / (combinedMass)) + ((2 * m2 * v2.y) / (combinedMass)),
+            },
+            [p2.id]: {
+                x: ((2 * m1 * v1.x) / (combinedMass)) - (((massDifference) * v2.x) / (combinedMass)),
+                y: ((2 * m1 * v1.y) / (combinedMass)) - (((massDifference) * v2.y) / (combinedMass)),
+            },
+        };
+    }
+
+    private static addCollision(collisions: CollisionMap, collision: Collision) {
+        const [particleA, particleB] = Object.keys(collision);
+
+        if(!(particleA in collisions)){
+            collisions[particleA] = {};
         }
-    }
 
-    private getCollisions(particle: IParticle, nearbyMatrix: ParticleMatrix) {
-        // ToDo: implement. map over nearby particles, check for collisions, figure out how to return/apply particles
+        if(!(particleB in collisions)){
+            collisions[particleB] = {};
+        }
+
+        collisions[particleA][particleB] = collision;
+        collisions[particleB][particleA] = collision;
     }
+}
+
+export interface Collision {
+    [particleId: string]: DirectionalMagnitude,
 }

@@ -1,5 +1,5 @@
 import {Timer} from "../Timer";
-import {Environment, NearbyParticle} from "./Environment";
+import {Environment} from "./Environment";
 import {SimulationBuffer} from "./SimulationCalculator";
 import {DirectionalMagnitude} from "./DirectionalMagnitude";
 
@@ -12,15 +12,6 @@ export interface PhysicalProperties {
 }
 
 export type TickHandler = (timeSeconds: number, environment: Environment) => void;
-
-export type NearbyParticleMap = {
-    [particleId: number]: NearbyParticle;
-};
-
-export type ParticleMatrix = {
-    [particleId: number]: NearbyParticleMap;
-};
-
 export class Simulation {
 
     // determines how "fast" a simulation runs
@@ -34,7 +25,7 @@ export class Simulation {
     private timer: Timer = new Timer();
     private tickHandler: TickHandler = () => {};
 
-    private readonly calculations = new SimulationBuffer(this.environment, 1);
+    private readonly calculations = new SimulationBuffer(this.environment, 10);
 
     constructor(
         public readonly environment: Environment
@@ -61,12 +52,10 @@ export class Simulation {
         if(this.running){
             this._timeMilliseconds = this.timer.elapsed;
 
-            const stepResult = this.calculations.calculate(this.scaledTotalMilliseconds());
+            const simulationStep = this.calculations.calculate(this.scaledTotalMilliseconds());
 
-            Object.keys(stepResult).forEach(particleId => {
-
-                const particleStep = stepResult[particleId];
-
+            Object.keys(simulationStep.particles).forEach(particleId => {
+                const particleStep = simulationStep.particles[particleId];
                 const particle = this.environment.getParticle(particleId);
                 particle.setPosition(particleStep.position);
             });

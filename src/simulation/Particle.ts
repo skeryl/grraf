@@ -5,11 +5,6 @@ import {Environment, NearbyParticle} from "./Environment";
 import {Coordinates} from "../Coordinates";
 import {add, Direction, DirectionalMagnitude, ZERO} from "./DirectionalMagnitude";
 
-export interface Collision {
-    force: DirectionalMagnitude;
-    particle: NearbyParticle;
-}
-
 export interface IParticle {
 
     readonly id: number;
@@ -19,13 +14,7 @@ export interface IParticle {
     readonly acceleration: DirectionalMagnitude;
     readonly velocity: DirectionalMagnitude;
 
-    addForce(force: DirectionalMagnitude): void;
-    resolveForces(): DirectionalMagnitude;
-    applyForce(forces: DirectionalMagnitude): void;
-    adjustVelocity(time: number): void;
-    setPosition(coordinates: Coordinates): void;
-    setAcceleration(acceleration: DirectionalMagnitude): void;
-    boundary(theta: number): DirectionalMagnitude;
+    boundary(position: DirectionalMagnitude, theta: number): DirectionalMagnitude;
 }
 
 export class Particle implements IParticle {
@@ -34,7 +23,6 @@ export class Particle implements IParticle {
     readonly velocity: DirectionalMagnitude;
 
     private readonly forcesToResolve: DirectionalMagnitude[] = [];
-    private readonly collisionsToResolve: Collision[] = [];
 
     constructor(
         public readonly environment: Environment,
@@ -49,14 +37,14 @@ export class Particle implements IParticle {
         this.forcesToResolve.push(force);
     }
 
-    boundary(theta: number): DirectionalMagnitude {
+    boundary(position: DirectionalMagnitude, theta: number): DirectionalMagnitude {
         if (this.shape.constructor.name === "Circle") {
             const circle = this.shape as Circle;
-            const deltaX = circle.radius * Math.sin(theta);
-            const deltaY = circle.radius * Math.cos(theta);
+            const deltaX = circle.radius * Math.cos(theta);
+            const deltaY = circle.radius * Math.sin(theta);
             return {
-                x: circle.x + deltaX,
-                y: circle.y + deltaY,
+                x: position.x + deltaX,
+                y: position.y + deltaY,
             };
         }
         throw new Error("Not implemented");

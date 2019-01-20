@@ -45,7 +45,7 @@ export class Environment {
         };
     }
 
-    public getParticle(id: string): IParticle {
+    public getParticle(id: string): Particle {
         return this.particlesByShape[id];
     }
 
@@ -90,8 +90,8 @@ export class Environment {
         return 1/(this.properties.metersPerPixel/meters);
     }
 
-    public getParticlesNearby(particle: Particle, withinRadius?: number): NearbyParticle[] {
-        return this.getParticlesNear(particle.shape.position, withinRadius).filter(p => p.particle.id !== particle.id);
+    public getParticlesNearby(particle: IParticle, withinRadius?: number): NearbyParticle[] {
+        return this.getParticlesNear(particle.position, withinRadius).filter(p => p.particle.id !== particle.id);
     }
 
     public getParticlesNear(position: DirectionalMagnitude, withinRadius?: number): NearbyParticle[] {
@@ -103,7 +103,7 @@ export class Environment {
             .filter(nearby => Boolean(nearby.particle));
     }
 
-    recalculateParticleForces(particle: Particle, forces: ForceMap = {}): { nearby: NearbyParticle[], forces: ForceMap } {
+    recalculateParticleForces(particle: IParticle, forces: ForceMap = {}): { nearby: NearbyParticle[], forces: ForceMap } {
 
         const nearby = this.getParticlesNearby(particle);
 
@@ -119,7 +119,7 @@ export class Environment {
     }
 
 
-    private static gravitationalForceOn(particle: Particle, nearbyParticle: NearbyParticle) {
+    private static gravitationalForceOn(particle: IParticle, nearbyParticle: NearbyParticle) {
 
         const angleX = Math.asin(nearbyParticle.distance.x / nearbyParticle.distance.total);
         const angleY = Math.acos(nearbyParticle.distance.y / nearbyParticle.distance.total);

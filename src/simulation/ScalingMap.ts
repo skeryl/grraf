@@ -5,7 +5,7 @@ export class ScalingMap<Key, Value> {
     private data: Map<Key, Value> = new Map<Key, Value>();
 
     constructor(
-        public numberToKeep: number = 100,
+        public numberToKeep: number = 2000,
     ) {
     }
 
@@ -37,6 +37,10 @@ export class ScalingMap<Key, Value> {
 
     public keys(): IterableIterator<Key> {
         return this.data.keys();
+    }
+
+    public delete(key: Key): boolean {
+        return this.data.delete(key);
     }
 
 }
