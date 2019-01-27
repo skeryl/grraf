@@ -1,10 +1,11 @@
 {
   "name": "grraf",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A visualization and graphing library written in TypeScript",
-  "main": "dist/index.js",
+  "main": "dist/lib/index.js",
+  "types": "dist/lib/index.d.ts",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc --declaration",
     "build-examples": "webpack",
     "watch-examples": "webpack --watch",
     "start:examples": "webpack-dev-server",
