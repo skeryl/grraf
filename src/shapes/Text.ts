@@ -3,28 +3,33 @@ import {Coordinates} from "../Coordinates";
 
 export class Text extends Shape {
 
-    private _maxWidth: number | undefined;
-    private _text: string = "";
-
-    maxWidth = (): number | undefined => {
-        return this._maxWidth;
-    };
+    public maxWidth: number | undefined;
+    public text: string = "";
+    public fontSize: number = 12;
+    public fontFamily: string = "Arial";
 
     public setMaxWidth = (maxWidth: number | SizeFunction): Text  => {
         return this.setValue(maxWidth, "_maxWidth") as Text;
     };
 
-    text = (): string => {
-        return this._text;
-    };
+    public setFontFamily(fontFamily: string): Text {
+        this.fontFamily = fontFamily;
+        return this;
+    }
+
+    public setFontSize(fontSize: number): Text {
+        this.fontSize = fontSize;
+        return this;
+    }
 
     public setText = (text: string): Text => {
-        this._text = text;
+        this.text = text;
         return this;
     };
 
     drawShape(){
-        this.context.fillText(this.text(), this.x, this.y, this.maxWidth());
+        this.context.font = `${this.fontFamily} ${this.fontSize}px`;
+        this.context.fillText(this.text, this.x, this.y, this.maxWidth);
     }
 
     public withinBounds(coords: Coordinates): boolean {

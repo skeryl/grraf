@@ -81,6 +81,13 @@ export enum TimingFunction {
 
 type EaseFunc = (x: number) => number;
 
+function combineNumbers(startValue: any, endValue: any, percent: number) {
+    const start = <number><any>startValue;
+    const end = <number><any>endValue;
+    const total = (end - start);
+    return start + (percent * total);
+}
+
 export class Animation {
 
     /**
@@ -184,11 +191,16 @@ export class Animation {
             throw new Error("Unable to combine strings.");
         }
         if(type === "number"){
-            const start = <number><any>startValue;
-            const end = <number><any>endValue;
-
-            const total = (end - start);
-            return start + (percent * total) as any as T[K];
+            return combineNumbers(startValue, endValue, percent) as any as T[K];
+        }
+        if(
+            "x" in startValue && "y" in startValue &&
+            "x" in endValue && "y" in endValue
+        ){
+            return {
+                x: combineNumbers((<any>startValue).x, (<any>endValue).x, percent),
+                y: combineNumbers((<any>startValue).y, (<any>endValue).y, percent),
+            } as any as T[K];
         }
         throw new Error(`Unable to combine values of type '${type}.'`);
     }

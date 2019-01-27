@@ -102,6 +102,11 @@ export class Shape {
         return { x: this.x, y: this.y };
     }
 
+    public set position(position: DirectionalMagnitude) {
+        this.x = position.x;
+        this.y = position.y;
+    }
+
     public setPosition = (position: Coordinates): Shape => {
         this.x = position.x;
         this.y = position.y;
