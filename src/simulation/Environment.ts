@@ -12,6 +12,7 @@ export interface EnvironmentalProperties {
     dimensions: DirectionalMagnitude;
     universalForce: DirectionalMagnitude;
     metersPerPixel: number // meters per pixel
+    isMeasuringGravity: boolean;
 }
 
 export interface NearbyParticle {
@@ -41,6 +42,7 @@ export class Environment {
             },
             metersPerPixel: (100000),
             universalForce: {x: 0, y: 0},
+            isMeasuringGravity: true,
             ...properties,
         };
     }
@@ -107,13 +109,15 @@ export class Environment {
 
         const nearby = this.getParticlesNearby(particle);
 
-        nearby.forEach(nearbyParticle => {
-            const p = nearbyParticle.particle;
-            if(!(p.id in forces)){
-                forces[p.id] = [];
-            }
-            forces[p.id].push(Environment.gravitationalForceOn(particle, nearbyParticle));
-        });
+        if(this.properties.isMeasuringGravity){
+            nearby.forEach(nearbyParticle => {
+                const p = nearbyParticle.particle;
+                if(!(p.id in forces)){
+                    forces[p.id] = [];
+                }
+                forces[p.id].push(Environment.gravitationalForceOn(particle, nearbyParticle));
+            });
+        }
 
         return { nearby, forces };
     }

@@ -2,6 +2,7 @@ import {BasicShapes} from "./01-basic-shapes/BasicShapes";
 import {SomethingPretty} from "./0X-make-something-pretty/SomethingPretty";
 import {BasicAnimation} from "./02-basic-animation/BasicAnimation";
 import {ExampleSimulation} from "./03-simulation/ExampleSimulation";
+import {CollisionSimulation} from "./04-another-simulation/CollisionSimulation";
 
 export interface Example {
 
@@ -78,8 +79,9 @@ class Main {
 }
 
 const examples = [
-    new ExampleSimulation(),
     new SomethingPretty(),
+    new CollisionSimulation(),
+    new ExampleSimulation(),
     new BasicAnimation(),
     new BasicShapes(),
 ];

@@ -1,4 +1,5 @@
 import {Shape} from "./shapes/Shape";
+import has = Reflect.has;
 
 export type Layer = Map<number, Shape>;
 
@@ -45,28 +46,35 @@ export class ShapeStore {
         return Array.from(this.store.values()).map(layer => layer.values())
     }*/
 
+    private shapeSorter = (shapeA: Shape, shapeB: Shape): number => {
+        if(shapeA.hasClipping() === shapeB.hasClipping()){
+            return 0;
+        }
+
+        if(shapeA.hasClipping()){
+            return -1;
+        }
+
+        return 1;
+    };
+
     public forEach = (action: (s: Shape) => void): void => {
         this.layerIndices().sort((a, b) => {
             return a > b ? 1 : a < b ? -1 : 0;
         }).forEach(layerIndex => {
-            const shapes = this.shapesOnLayer(layerIndex)
-                .sort((shapeA, shapeB) => {
-                    if(shapeA.hasClipping() === shapeB.hasClipping()){
-                        return 0;
-                    }
-
-                    if(shapeA.hasClipping()){
-                        return -1;
-                    }
-
-                    return 1;
-                });
-
+            const shapes = this.shapesOnLayer(layerIndex).sort(this.shapeSorter);
             shapes.forEach(shape => {
                 action(shape);
             });
 
         });
+    };
+
+        public count = (): number => {
+        return Array.from(this.store.values())
+            .reduce((result: number, shapes: Map<number,Shape>) => {
+                return result + shapes.size;
+            }, 0);
     };
 
     public shapesOnLayer = (layerIndex: number): Shape[] => {

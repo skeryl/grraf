@@ -1,6 +1,7 @@
 import {Collision, SimulationCalculator} from "../../src/simulation/SimulationCalculator";
 import {Environment} from "../../src/simulation/Environment";
 import {getTestEnvironment} from "../testUtils";
+import {Rectangle} from "../../src/shapes/Rectangle";
 
 describe('SimulationCalculator', () => {
 
@@ -127,6 +128,58 @@ describe('SimulationCalculator', () => {
 
             expect(collision[particleB.id].x).toBe(5);
             expect(collision[particleB.id].y).toBe(0);
+        }
+    });
+
+    test('should calculate an elastic collision between a circle and rectangle', () => {
+
+        const env: Environment = getTestEnvironment({
+            metersPerPixel: 20, // 50 pixels is one kilometer,
+            isMeasuringGravity: false,
+        });
+
+        const particle = env.createParticle({
+            position: { x: 50, y: 50 },
+            initialVelocity: { x: 1, y: 5 },
+            mass: 10 // kg
+        });
+
+        const barA = env.createParticle({
+                position: { x: 0, y: 0 },
+                mass: 10**30 // kg
+            },
+            env.stage.createShape(Rectangle).setWidth(1000),
+        );
+
+        const barB = env.createParticle({
+            position: { x: 0, y: 100 },
+            mass: 10**30 // kg
+        },
+            env.stage.createShape(Rectangle).setWidth(1000),
+        );
+
+        const simulationCalculator = new SimulationCalculator(env);
+
+        let collision: Collision | undefined;
+
+        for(let time = 0; time < 10_000; time += 50){
+
+            const atCollision = simulationCalculator.calculate(time);
+
+            if(Object.keys(atCollision.collisions).length){
+                expect(particle.id in atCollision.collisions).toBeTruthy();
+                collision = atCollision.collisions[particle.id][barB.id];
+            }
+        }
+
+        expect(collision).toBeDefined();
+        // cleanest way to appease dumbisense
+        if(collision){
+            expect(collision[particle.id].x).toBe(-5);
+            expect(collision[particle.id].y).toBe(0);
+
+            expect(collision[barB.id].x).toBe(0);
+            expect(collision[barB.id].y).toBe(0);
         }
     });
 

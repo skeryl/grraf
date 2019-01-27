@@ -4,6 +4,7 @@ import {PhysicalProperties} from "./Simulation";
 import {Environment, NearbyParticle} from "./Environment";
 import {Coordinates} from "../Coordinates";
 import {add, Direction, DirectionalMagnitude, ZERO} from "./DirectionalMagnitude";
+import {Rectangle} from "../shapes/Rectangle";
 
 export interface IParticle {
 
@@ -14,7 +15,7 @@ export interface IParticle {
     readonly acceleration: DirectionalMagnitude;
     readonly velocity: DirectionalMagnitude;
 
-    boundary(position: DirectionalMagnitude, theta: number): DirectionalMagnitude;
+    boundary(othersPosition: DirectionalMagnitude, position: DirectionalMagnitude, theta: number): DirectionalMagnitude;
 }
 
 export class Particle implements IParticle {
@@ -37,8 +38,8 @@ export class Particle implements IParticle {
         this.forcesToResolve.push(force);
     }
 
-    boundary(position: DirectionalMagnitude, theta: number): DirectionalMagnitude {
-        if (this.shape.constructor.name === "Circle") {
+    boundary(othersPosition: DirectionalMagnitude, position: DirectionalMagnitude, theta: number): DirectionalMagnitude {
+        if (this.shape instanceof Circle) {
             const circle = this.shape as Circle;
             const deltaX = circle.radius * Math.cos(theta);
             const deltaY = circle.radius * Math.sin(theta);
@@ -47,6 +48,33 @@ export class Particle implements IParticle {
                 y: position.y + deltaY,
             };
         }
+
+        if(this.shape instanceof Rectangle){
+            const rect = this.shape as Rectangle;
+
+            const rightBound = position.x + (rect.width());
+            const leftBound = position.x;
+
+            const leftOfRect = othersPosition.x < leftBound;
+            const rightOfRect = othersPosition.x > rightBound;
+
+            if(leftOfRect || rightOfRect){
+                // coming from the side
+                return {
+                    x: leftOfRect ? position.x : (rightBound),
+                    y: othersPosition.y,
+                };
+            } else {
+                //coming from top or bottom
+                const yDiff = (position.y - othersPosition.y);
+
+                return {
+                    x: (othersPosition.x + (yDiff/Math.tan(Math.PI - theta))),
+                    y: (othersPosition.y < position.y) ? position.y : (position.y + rect.height()),
+                };
+            }
+        }
+
         throw new Error("Not implemented");
     }
 

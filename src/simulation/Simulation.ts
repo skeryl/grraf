@@ -25,7 +25,7 @@ export class Simulation {
     private timer: Timer = new Timer();
     private tickHandler: TickHandler = () => {};
 
-    private readonly calculations = new SimulationBuffer(this.environment, 10);
+    private readonly calculations = new SimulationBuffer(this.environment, 20 * this.speed);
 
     constructor(
         public readonly environment: Environment
@@ -49,7 +49,7 @@ export class Simulation {
     };
 
     private tick = (): void => {
-        if(this.running){
+        if(this && this.running){
             this._timeMilliseconds = this.timer.elapsed;
 
             const simulationStep = this.calculations.calculate(this.scaledTotalMilliseconds());
@@ -74,11 +74,13 @@ export class Simulation {
     public start = (): void => {
         this.running = true;
         this.timer.start();
+        this.calculations.start();
         this.tick();
     };
 
     public stop = (): void => {
         this.running = false;
+        this.calculations.stop();
         this.timer.stop();
     };
 

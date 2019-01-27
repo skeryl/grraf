@@ -4,6 +4,8 @@ import {Rectangle} from "../../src/shapes/Rectangle";
 import {Color} from "../../src/Color";
 import {Path} from "../../src/shapes/Path";
 import {DirectionalMagnitude} from "../../src/simulation/DirectionalMagnitude";
+import {MouseInfo} from "../../src/Mouse";
+import {Shape} from "../../src/shapes/Shape";
 
 const NUM_ROWS = 30;
 const NUM_COLS = 100;
@@ -25,9 +27,49 @@ const VERTICAL_SPACING = 20;
 const BORDER_WIDTH = 800;
 const BORDER_HEIGHT = 800;
 
+
+export class AnchoredSquiggle extends Shape {
+
+    private path: Path;
+    private target: DirectionalMagnitude = { x: this.x + SEGMENT_LENGTH, y: this.y };
+    private cpPosition: DirectionalMagnitude= { x: this.target.x, y: this.target.y };
+
+    constructor(stage: Stage, id: number, context: CanvasRenderingContext2D, x: number, y: number, color: Color) {
+        super(stage, id, context, x, y, color);
+
+
+        this.path = this.stage.createShape(Path)
+            .setLineCap("round")
+            .setStrokeColor(redOrange) as Path;
+    }
+
+    setTarget(x: number, y: number): AnchoredSquiggle {
+        this.target = { x, y };
+        return this;
+    }
+
+    setCpPosition(value: DirectionalMagnitude): AnchoredSquiggle {
+        this.cpPosition = value;
+        return this;
+    }
+
+    drawShape() {
+        this.path.resetPath();
+        this.path.moveTo(this.x, this.y)
+            .quadraticCurveTo(this.target.x, this.target.y, this.x + SEGMENT_LENGTH, this.y)
+            .setStrokeWidth(this.strokeWidth || 1);
+        this.path.drawShape();
+    }
+}
+
+
 export class SomethingPretty implements Example {
 
     private stage: Stage | undefined = undefined;
+    private mouse: MouseInfo | undefined;
+    private border: Shape | undefined;
+
+    private squiggles: AnchoredSquiggle[] = [];
 
     start(window: Window, container: HTMLElement): void {
 
@@ -38,34 +80,32 @@ export class SomethingPretty implements Example {
             y: (window.innerHeight - BORDER_HEIGHT) / 2,
         };
 
-        const border = this.stage.createShape(Rectangle, startingPosition.x, startingPosition.y, white, -1)
+        this.border = this.stage.createShape(Rectangle, startingPosition.x, startingPosition.y, white, -1)
             .setHeight(BORDER_HEIGHT)
             .setWidth(BORDER_WIDTH)
             .setColor(white)
-            .setStrokeWidth(10)
+            .setStrokeWidth(20)
             .setStrokeColor(aqua);
 
-        const initialX = border.position.x + (border.strokeWidth || 0);
+        const borderEdgeRight = BORDER_WIDTH + this.border.x;
+        const borderEdgeDown = BORDER_HEIGHT + this.border.y;
+
+        const initialX = this.border.position.x + (this.border.strokeWidth || 0);
         let next: DirectionalMagnitude | null = {
             x: initialX,
-            y: border.position.y  + (border.strokeWidth || 0)
+            y: this.border.position.y  + (this.border.strokeWidth || 0)
         };
-
-        const borderEdgeRight = BORDER_WIDTH + border.x;
-        const borderEdgeDown = BORDER_HEIGHT + border.y;
 
         let count = 0;
 
-        while(next !== null/* && count < 10000*/){
+        while(next !== null){
             const currentX: number = next.x + SEGMENT_LENGTH;
             const currentY: number = next.y;
 
-            this.stage.createShape(Path)
-                .moveTo(next.x, next.y)
-                .lineTo(currentX, currentY)
-                .setLineCap("round")
-                .setStrokeWidth(2)
-                .setStrokeColor(redOrange);
+            const squiggle = this.stage.createShape(AnchoredSquiggle)
+                .setPosition({ x: next.x, y: next.y }) as AnchoredSquiggle;
+
+            this.squiggles.push(squiggle);
 
             const nextX = currentX + SEGMENT_LENGTH + SEGMENT_SPACING;
             const nextY = currentY + VERTICAL_SPACING;
@@ -85,83 +125,40 @@ export class SomethingPretty implements Example {
         }
 
         this.stage.onMouseUpdate(mouse => {
-            if(this.stage){
-                const nearbyShapes = this.stage.getShapesNear(mouse.position());
-
-                nearbyShapes.forEach(nearby => {
-
-                    if(nearby.shape.constructor.name !== "Path"){
-                        return;
-                    }
-
-                    const shape = nearby.shape as Path;
-
-                    const y = nearby.distance.y;
-                    const x = nearby.distance.x;
-                    const riseOverRun = x === 0 ? 0 : (y / x);
-
-                    const runOverRise = y === 0 ? 0 : (x / y);
-
-                    const rotation = (runOverRise+riseOverRun)/2;
-
-                    const factor = (riseOverRun < 1 ? riseOverRun : runOverRise);
-                    shape.rotate(rotation * factor * Math.PI );
-                });
-                this.stage.draw();
-            }
+            this.mouse = mouse;
+            window.requestAnimationFrame(this.redrawLines);
         });
 
-        /*for(let rowIx = 0; rowIx < NUM_ROWS; rowIx++){
-            for(let colIx = 0; colIx < NUM_COLS; colIx++){
-                this.stage.createShape(Rectangle)
-                    .setHeight(RECT_HEIGHT).setWidth(RECT_WIDTH)
-                    .setColor(pink)
-                    .setPosition({
-                        x: startingPosition.x + (spacing*RECT_WIDTH*colIx),
-                        y: startingPosition.y + (spacing*RECT_HEIGHT*rowIx)
-                    });
-            }
-        }
-
-        this.stage.onMouseUpdate(mouse => {
-            if(this.stage){
-                const nearbyShapes = this.stage.getShapesNear(mouse.position());
-
-                nearbyShapes.forEach(nearby => {
-
-                    const y = nearby.distance.y;
-                    const x = nearby.distance.x;
-
-                    const riseOverRun = x === 0 ? 0 : (y / x);
-                    const runOverRise = y === 0 ? 0 : (x / y);
-
-                    const rotation = (runOverRise+riseOverRun)/2;
-
-                    const factor = (riseOverRun < 1 ? riseOverRun : runOverRise);
-                    nearby.shape.setColor(
-                        Math.abs(factor) < 0.5 ? pink : orangeJuice
-                    );
-
-                    nearby.shape.rotate(rotation * factor * Math.PI );
-                });
-                this.stage.draw();
-            }
-        });*/
-        this.stage.draw();
     }
+
+
+    private redrawLines = (): void => {
+        if(this.stage){
+            if(this.border && this.mouse){
+                const position = this.mouse.position();
+                const velocity = this.mouse.velocity();
+                // const width = Math.min(20,Math.max(1,Math.floor((velocity.x + velocity.y))));
+
+                this.squiggles.forEach(squiggle => {
+                    squiggle.setTarget(position.x, position.y)
+                        .setCpPosition({ x: velocity.x, y: velocity.y })
+                        .setStrokeWidth(1);
+                });
+            }
+            this.stage.draw();
+        }
+        // window.requestAnimationFrame(this.redrawLines);
+    };
 
     stop(): void {
         if(this.stage){
             this.stage.clear();
             this.stage = undefined;
         }
+        this.squiggles = []
     }
 
     name: string = "Pretty Stuff";
 
     description: string = "An example that shows interaction, many shapes, and animation.";
-
-    private draw = () => {
-
-    }
 }
