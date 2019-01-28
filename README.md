@@ -12,7 +12,7 @@ My hope is that it will continue to evolve as an actual tool to explain and visu
 > npm install --save grraf
 
 ## Use
-```
+```javascript
 import { Stage, Circle, Color } from "grraf";
 
 // either an actual Canvas element or any containing html element can be supplied.
