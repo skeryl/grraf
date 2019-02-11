@@ -1,6 +1,6 @@
 {
   "name": "grraf",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "A visualization and graphing library written in TypeScript",
   "main": "dist/lib/index.js",
   "types": "dist/lib/index.d.ts",
