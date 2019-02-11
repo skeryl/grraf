@@ -1,5 +1,5 @@
 import {Shape} from "./shapes/Shape";
-import {Color} from "./Color";
+import {Color} from "./color/Color";
 import {MouseInfo} from "./Mouse";
 import {ShapeStore} from "./ShapeStore";
 import {Coordinates} from "./Coordinates";

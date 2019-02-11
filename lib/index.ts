@@ -1,6 +1,6 @@
 
 export * from '../src/Stage';
-export * from '../src/Color';
+export * from '../src/color';
 export * from '../src/Mouse';
 export * from '../src/Animation';
 export * from '../src/Timer';

@@ -1,4 +1,4 @@
-import {Color} from "./Color";
+import {Color} from "./color/Color";
 import {Shape} from "./shapes/Shape";
 import {Stage} from "./Stage";
 

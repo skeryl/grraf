@@ -99,7 +99,7 @@ export class ShapeStore {
             console.group(`Layer ${layer}`);
 
             this.shapesOnLayer(layer).forEach(shape => {
-                console.log(`${shape.constructor.name}[${shape.id}] (x: ${shape.x}, y: ${shape.y}) (color: ${shape.getColor().fillStyle()})`);
+                console.log(`${shape.constructor.name}[${shape.id}] (x: ${shape.x}, y: ${shape.y}) (color: ${shape.getColor().toString()})`);
             });
 
             console.groupEnd();

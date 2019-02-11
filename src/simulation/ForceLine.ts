@@ -1,7 +1,7 @@
 import {Shape} from "../shapes/Shape";
 import {IParticle, Particle} from "./Particle";
 import {Distance, Stage} from "../Stage";
-import {Color} from "../Color";
+import {Color} from "../color/Color";
 import {Path} from "../shapes/Path";
 import {NearbyParticle} from "./Environment";
 

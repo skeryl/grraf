@@ -1,11 +1,12 @@
-import {Animation} from "./Animation";
+import {Animation} from "../Animation";
+import {FillStyle} from "./FillStyle";
 
 function wAvg(a: number, b: number, weight: number): number {
     const weightForA = (1 - weight);
     return Math.round((weightForA * a) + (weight * b));
 }
 
-export class Color {
+export class Color implements FillStyle {
 
     constructor(
         private r: number = 0,
@@ -47,15 +48,11 @@ export class Color {
         return this;
     };
 
-    public fillStyle = (includeOpacity: boolean = false): string => {
+    public fillStyle = (ctx: CanvasRenderingContext2D | null = null, includeOpacity: boolean = false): string => {
         return includeOpacity ?
             `rgba(${this.r}, ${this.g}, ${this.b}, ${this.o.toFixed(2)})` :
             `rgb(${this.r}, ${this.g}, ${this.b})`;
     };
-
-    toString(): string {
-        return this.fillStyle();
-    }
 
     public static combineColors(colorA: Color, colorB: Color, weight: number, ease: boolean = true): Color {
 

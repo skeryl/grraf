@@ -1,25 +1,19 @@
 import {Example} from "../index";
 import {Stage} from "../../src/Stage";
 import {Rectangle} from "../../src/shapes/Rectangle";
-import {Color} from "../../src/Color";
+import {Color} from "../../src/color/Color";
 import {Path} from "../../src/shapes/Path";
 import {DirectionalMagnitude} from "../../src/simulation/DirectionalMagnitude";
 import {MouseInfo} from "../../src/Mouse";
 import {Shape} from "../../src/shapes/Shape";
-
-const NUM_ROWS = 30;
-const NUM_COLS = 100;
-const RECT_HEIGHT = 15;
-const RECT_WIDTH = 10;
+import {LinearGradient} from "../../src/color/LinearGradient";
+import {RadialGradient} from "../../src/color/RadialGradient";
 
 const SEGMENT_LENGTH = 20;
 
 const pink = new Color(247, 24, 120);
-const redOrange = new Color(221, 60, 2);
 const aqua = new Color(66, 229, 244);
 const white = new Color(255, 255, 255);
-
-const spacing = 1.5;
 
 const SEGMENT_SPACING = 4.5;
 const VERTICAL_SPACING = 20;
@@ -40,7 +34,7 @@ export class AnchoredSquiggle extends Shape {
 
         this.path = this.stage.createShape(Path)
             .setLineCap("round")
-            .setStrokeColor(redOrange) as Path;
+            .setStrokeColor(white) as Path;
     }
 
     setTarget(x: number, y: number): AnchoredSquiggle {
@@ -57,7 +51,8 @@ export class AnchoredSquiggle extends Shape {
         this.path.resetPath();
         this.path.moveTo(this.x, this.y)
             .quadraticCurveTo(this.target.x, this.target.y, this.x + SEGMENT_LENGTH, this.y)
-            .setStrokeWidth(this.strokeWidth || 1);
+            .setStrokeWidth(this.strokeWidth || 1)
+            .setStrokeColor(white);
         this.path.drawShape();
     }
 }
@@ -83,9 +78,22 @@ export class SomethingPretty implements Example {
         this.border = this.stage.createShape(Rectangle, startingPosition.x, startingPosition.y, white, -1)
             .setHeight(BORDER_HEIGHT)
             .setWidth(BORDER_WIDTH)
-            .setColor(white)
+            .setColor(
+                new RadialGradient(
+                    {x: startingPosition.x + (BORDER_WIDTH/2), y: startingPosition.y + (BORDER_HEIGHT/2) },
+                    5,
+                    startingPosition,
+                    Math.max(BORDER_WIDTH, BORDER_HEIGHT) * 1.15
+                )
+                    .addColorStop(aqua, 0)
+                    .addColorStop(pink, 1)
+            )
             .setStrokeWidth(20)
-            .setStrokeColor(aqua);
+            .setStrokeColor(
+                new LinearGradient(startingPosition, {x: startingPosition.x + BORDER_WIDTH, y: startingPosition.y + BORDER_HEIGHT })
+                    .addColorStop(aqua, 0)
+                    .addColorStop(pink, 1)
+            );
 
         const borderEdgeRight = BORDER_WIDTH + this.border.x;
         const borderEdgeDown = BORDER_HEIGHT + this.border.y;

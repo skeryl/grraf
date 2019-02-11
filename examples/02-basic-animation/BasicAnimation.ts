@@ -1,7 +1,7 @@
 import {Example} from "../index";
 import {Stage} from "../../src/Stage";
 import {Circle} from "../../src/shapes/Circle";
-import {Color} from "../../src/Color";
+import {Color} from "../../src/color/Color";
 import {Animation, TimingFunction} from "../../src/Animation";
 
 const sexyPink = new Color(247, 24, 120);

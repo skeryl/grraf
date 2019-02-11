@@ -1,7 +1,7 @@
 import {Example} from "../index";
 import {Stage} from "../../src/Stage";
 import {Rectangle} from "../../src/shapes/Rectangle";
-import {Color} from "../../src/Color";
+import {Color} from "../../src/color/Color";
 import {Circle} from "../../src/shapes/Circle";
 import {Path} from "../../src/shapes/Path";
 

@@ -1,7 +1,8 @@
-import {Color} from "../Color";
+import {Color} from "../color/Color";
 import {Coordinates} from "../Coordinates";
 import {MouseCallback, Stage} from "../Stage";
 import {DirectionalMagnitude} from "../simulation/DirectionalMagnitude";
+import {Fill, FillStyle} from "../color/FillStyle";
 
 export class SizeStrategy {
 
@@ -15,7 +16,7 @@ export type SizeFunction = (canvas: HTMLCanvasElement) => number;
 
 export class Shape {
 
-    public strokeColor: Color | undefined;
+    public strokeColor: FillStyle | undefined;
     public strokeWidth?: number;
 
     private clippingSources: Shape[] = [];
@@ -29,7 +30,7 @@ export class Shape {
         protected readonly context: CanvasRenderingContext2D,
         public x: number,
         public y: number,
-        public color: Color = new Color(),
+        public color: FillStyle = new Color(),
         private rotation?: number | undefined,
     ){
         this.drawShape = this.drawShape.bind(this);
@@ -129,7 +130,7 @@ export class Shape {
         return this;
     }
 
-    public setStrokeColor = (c: Color): Shape => {
+    public setStrokeColor = (c: FillStyle): Shape => {
         this.strokeColor = c;
         return this;
     };
@@ -139,12 +140,12 @@ export class Shape {
         return this;
     };
 
-    public setColor = (c: Color): Shape => {
+    public setColor = (c: FillStyle): Shape => {
         this.color = c;
         return this;
     };
 
-    public getColor(): Color {
+    public getColor(): FillStyle {
         return this.color;
     }
 
@@ -155,12 +156,12 @@ export class Shape {
         this.context.save();
 
         if(this.strokeColor){
-            this.context.strokeStyle = this.strokeColor.fillStyle(true);
+            this.context.strokeStyle = this.strokeColor.fillStyle(this.context);
         }
         if (this.strokeWidth !== undefined) {
             this.context.lineWidth = this.strokeWidth;
         }
-        this.context.fillStyle = this.color.fillStyle(true);
+        this.context.fillStyle = this.color.fillStyle(this.context);
 
         if(this.rotation !== undefined){
             this.context.translate(this.x, this.y);
