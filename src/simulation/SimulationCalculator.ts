@@ -80,7 +80,7 @@ export class SimulationBuffer {
             } else {
                 console.log(`calculated up to ${this.lastComputed}ms; waiting for simulation to catch up.`);
             }
-            window.requestAnimationFrame(this.tick);
+            window.requestAnimationFrame(this.tick.bind(this));
         }
     }
 
@@ -88,15 +88,6 @@ export class SimulationBuffer {
         this.lastRequested = time;
         return this.calculator.calculate(time);
     }
-
-    /*private preBuffer() {
-        return new Promise<void>(resolve => {
-            for (let time = 0; time < this.preBufferMilliseconds; time += (this.stepTimeMilliseconds)) {
-                this.calculator.calculate(time);
-            }
-            resolve();
-        });
-    }*/
 
 }
 
