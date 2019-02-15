@@ -75,13 +75,13 @@ export class MouseInfo {
         return this;
     }
 
-    public update = (event: MouseEvent, down: boolean = false) => {
+    public update = (event: MouseEvent, down?: boolean) => {
 
         const measurement = new Date();
 
         const button = event.button === 0 ? MouseButton.left : event.button === 2  ? MouseButton.right : event.button === 1 ? MouseButton.middle : undefined;
 
-        if(button){
+        if(button && down !== undefined){
             this.mouseDown[button] = down;
         }
 
