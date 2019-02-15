@@ -108,10 +108,10 @@ export class MouseInfo {
 
         if(down){
             this.onClick(this);
-        } else {
-            if((typeof this.onUpdate) === "function"){
-                this.onUpdate(this);
-            }
+        }
+
+        if((typeof this.onUpdate) === "function"){
+            this.onUpdate(this);
         }
 
     };
