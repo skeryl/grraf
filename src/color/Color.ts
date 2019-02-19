@@ -48,7 +48,7 @@ export class Color implements FillStyle {
         return this;
     };
 
-    public fillStyle = (ctx: CanvasRenderingContext2D | null = null, includeOpacity: boolean = false): string => {
+    public fillStyle = (ctx: CanvasRenderingContext2D | null = null, includeOpacity: boolean = true): string => {
         return includeOpacity ?
             `rgba(${this.r}, ${this.g}, ${this.b}, ${this.o.toFixed(2)})` :
             `rgb(${this.r}, ${this.g}, ${this.b})`;
