@@ -3,6 +3,7 @@ import {SomethingPretty} from "./0X-make-something-pretty/SomethingPretty";
 import {BasicAnimation} from "./02-basic-animation/BasicAnimation";
 import {ExampleSimulation} from "./03-simulation/ExampleSimulation";
 import {CollisionSimulation} from "./04-another-simulation/CollisionSimulation";
+import {ColoringPaths} from "./05-coloring-paths/ColoringPaths";
 
 export interface Example {
 
@@ -84,6 +85,7 @@ const examples = [
     new ExampleSimulation(),
     new BasicAnimation(),
     new BasicShapes(),
+    new ColoringPaths(),
 ];
 
 document.addEventListener("DOMContentLoaded", () => {

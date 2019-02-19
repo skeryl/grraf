@@ -5,7 +5,6 @@ export class Path extends Shape {
 
     private isClosed: boolean = false;
     private path: Path2D = new Path2D();
-    private lineWidth: number = 1;
     private lineCapType: CanvasLineCap | undefined;
 
     protected isPathLike(): boolean {
@@ -29,6 +28,7 @@ export class Path extends Shape {
 
     closePath(): Path {
         this.path.closePath();
+        this.isClosed = true;
         return this;
     }
 
@@ -59,6 +59,7 @@ export class Path extends Shape {
 
     resetPath(): Path {
         this.path = new Path2D();
+        this.isClosed = false;
         return this;
     }
 
@@ -66,7 +67,12 @@ export class Path extends Shape {
         if(this.lineCapType){
             this.context.lineCap = this.lineCapType;
         }
+
         this.context.stroke(this.path);
+
+        if(this.isClosed){
+            this.context.fill(this.path);
+        }
     }
 
     public withinBounds(coordinates: Coordinates): boolean {
