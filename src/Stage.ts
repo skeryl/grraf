@@ -5,6 +5,7 @@ import {ShapeStore} from "./ShapeStore";
 import {Coordinates} from "./Coordinates";
 import {AnimationBuilder} from "./Animation";
 import {DirectionalMagnitude} from "./simulation/DirectionalMagnitude";
+import {FillStyle} from "./color";
 
 
 export type Distance = DirectionalMagnitude & {
@@ -119,10 +120,10 @@ export class Stage {
     }
 
     createShape<T extends Shape>(
-        T: { new(stage: Stage, id: number, ctx: CanvasRenderingContext2D, x: number, y: number, color: Color): T },
+        T: { new(stage: Stage, id: number, ctx: CanvasRenderingContext2D, x: number, y: number, color: FillStyle): T },
         x: number = 0,
         y: number = 0,
-        color: Color = new Color(),
+        color: FillStyle = new Color(),
         layer: number = 0
     ): T {
         const shape: T = new T(this, this.nextId++, this.context, x, y, color);

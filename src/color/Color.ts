@@ -1,5 +1,6 @@
 import {Animation} from "../Animation";
 import {FillStyle} from "./FillStyle";
+import {average, weightedAverage} from "../utils/data";
 
 function wAvg(a: number, b: number, weight: number): number {
     const weightForA = (1 - weight);
@@ -64,4 +65,34 @@ export class Color implements FillStyle {
 
         return new Color(r, g, b);
     }
+
+    public static withOpacity(color: Color, opacity: number): Color {
+        return new Color(color.red(), color.green(), color.blue(), opacity);
+    }
+
+    public static mix(colors: Color[], weights?: number[]): Color {
+        const reds = colors.map(c => c.red());
+        const greens = colors.map(c => c.green());
+        const blues = colors.map(c => c.blue());
+        const opacities = colors.map(c => c.o);
+
+        if(weights){
+            return new Color(
+                weightedAverage(reds, weights),
+                weightedAverage(greens, weights),
+                weightedAverage(blues, weights),
+                weightedAverage(opacities, weights),
+            );
+        }
+        return new Color(
+            average(reds),
+            average(greens),
+            average(blues),
+            average(opacities),
+        );
+    }
+
+    public static white = new Color(255, 255, 255);
+    public static black = new Color(0, 0, 0);
+    public static transparent = new Color(0, 0, 0, 0.0);
 }

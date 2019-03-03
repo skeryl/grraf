@@ -72,13 +72,13 @@ export class Shape {
         return this.clippingSources.length > 0;
     };
 
-    public resetClipping = (): Shape => {
+    public resetClipping = (): this => {
         this.context.restore();
         this.clippingSources = [];
         return this;
     };
 
-    public removeClipping = (clipper: Shape): Shape => {
+    public removeClipping = (clipper: Shape): this => {
 
         const clipIndex = this.clippingSources.findIndex(source => source.id === clipper.id);
 
@@ -89,7 +89,7 @@ export class Shape {
         return this;
     };
 
-    public setClipping = (clipper: Shape): Shape => {
+    public setClipping = (clipper: Shape): this => {
 
         // prevent the shape from being rendered normally
         this.stage.removeShape(clipper.id);
@@ -108,13 +108,13 @@ export class Shape {
         this.y = position.y;
     }
 
-    public setPosition = (position: Coordinates): Shape => {
+    public setPosition = (position: Coordinates): this => {
         this.x = position.x;
         this.y = position.y;
         return this;
     };
 
-    protected setValue(n: number | SizeFunction, prop: string): Shape {
+    protected setValue(n: number | SizeFunction, prop: string): this {
         if(typeof n === "number"){
             (this as any)[prop] = n;
         } else if(typeof n === "function"){
@@ -130,17 +130,17 @@ export class Shape {
         return this;
     }
 
-    public setStrokeColor = (c: FillStyle): Shape => {
+    public setStrokeColor = (c: FillStyle): this => {
         this.strokeColor = c;
         return this;
     };
 
-    public setStrokeWidth = (width: number): Shape => {
+    public setStrokeWidth = (width: number): this => {
         this.strokeWidth = width;
         return this;
     };
 
-    public setColor = (c: FillStyle): Shape => {
+    public setColor = (c: FillStyle): this => {
         this.color = c;
         return this;
     };
