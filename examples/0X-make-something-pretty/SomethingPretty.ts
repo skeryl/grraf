@@ -19,7 +19,6 @@ const VERTICAL_SPACING = 20;
 const BORDER_WIDTH = 800;
 const BORDER_HEIGHT = 800;
 
-
 export class AnchoredSquiggle extends Shape {
 
     private path: Path;
@@ -34,12 +33,12 @@ export class AnchoredSquiggle extends Shape {
             .setStrokeStyle(white);
     }
 
-    setTarget(x: number, y: number): AnchoredSquiggle {
+    setTarget(x: number, y: number): this {
         this.target = { x, y };
         return this;
     }
 
-    setCpPosition(value: DirectionalMagnitude): AnchoredSquiggle {
+    setCpPosition(value: DirectionalMagnitude): this {
         this.cpPosition = value;
         return this;
     }
@@ -53,7 +52,6 @@ export class AnchoredSquiggle extends Shape {
         this.path.drawShape();
     }
 }
-
 
 export class SomethingPretty implements Example {
 
@@ -86,14 +84,14 @@ export class SomethingPretty implements Example {
             .addColorStop(pink, 1);
 
         this.border = this.stage.createShape(Rectangle, {
-            position: {x: startingPosition.x, y: startingPosition.y},
+            position: { x: startingPosition.x, y: startingPosition.y },
             layer: -1,
             width: BORDER_WIDTH,
             height: BORDER_HEIGHT,
-            fill: Color.black,
             strokeWidth: 20,
             strokeStyle: strokeStyle
-        });
+        })
+            .setFill(fill);
 
         const borderEdgeRight = BORDER_WIDTH + this.border.x;
         const borderEdgeDown = BORDER_HEIGHT + this.border.y;

@@ -1,6 +1,7 @@
 import {MouseCallback, Stage} from "../Stage";
 import {DirectionalMagnitude} from "../simulation/DirectionalMagnitude";
 import {FillStyle, Color} from "../color";
+import {deprecate} from "util";
 
 export class SizeStrategy {
     public static fullHeight = (canvas?: HTMLCanvasElement) => canvas ? canvas.height : window.innerHeight;
@@ -184,6 +185,14 @@ export abstract class Shape<TProperties extends ShapeProperties = ShapePropertie
         return this;
     };
 
+    public setFill = (fill: FillStyle): this => {
+        this.fill = fill;
+        return this;
+    };
+
+    /**
+     * @deprecated
+     */
     public setColor = (fill: FillStyle): this => {
         this.fill = fill;
         return this;
