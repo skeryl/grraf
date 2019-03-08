@@ -19,7 +19,7 @@ export interface ShapeProperties {
     strokeWidth?: number;
 }
 
-const DEFAULT_PROPERTIES: ShapeProperties = {
+export const DEFAULT_PROPERTIES: ShapeProperties = {
     layer: 0,
     position: {x: 0, y: 0 },
     fill: Color.black,

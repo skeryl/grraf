@@ -7,10 +7,12 @@ export function getTestStage() {
     const doc = dom.window.document;
 
     const container = doc.createElement("div");
+    container.style.height = '500px';
+    container.style.width = '500px';
     container.id = "main";
     doc.body.appendChild(container);
 
-    const stage = new Stage(container);
+    const stage = new Stage(container, true);
     return {container, stage};
 }
 
