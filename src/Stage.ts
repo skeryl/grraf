@@ -1,8 +1,7 @@
-import {Shape} from "./shapes/Shape";
+import {Shape, ShapeConstructor, ShapeProperties} from "./shapes/Shape";
 import {Color} from "./color/Color";
 import {MouseInfo} from "./Mouse";
 import {ShapeStore} from "./ShapeStore";
-import {Coordinates} from "./Coordinates";
 import {AnimationBuilder} from "./Animation";
 import {DirectionalMagnitude} from "./simulation/DirectionalMagnitude";
 import {FillStyle} from "./color";
@@ -38,7 +37,7 @@ export class Stage {
     private nextId: number = 0;
 
     public readonly shapes: ShapeStore = new ShapeStore();
-    private readonly context: CanvasRenderingContext2D;
+    public readonly context: CanvasRenderingContext2D;
     private readonly mouseInfo: MouseInfo;
 
     private readonly mouseUpdateCallbacks: Array<MouseCallback> = [];
@@ -119,38 +118,26 @@ export class Stage {
         return this;
     }
 
-    createShape<T extends Shape>(
-        T: { new(stage: Stage, id: number, ctx: CanvasRenderingContext2D, x: number, y: number, color: FillStyle): T },
-        x: number = 0,
-        y: number = 0,
-        color: FillStyle = new Color(),
-        layer: number = 0
-    ): T {
-        const shape: T = new T(this, this.nextId++, this.context, x, y, color);
+    public setShapeLayer(shape: Shape, layer: number){
         this.shapes.set(shape, layer);
+    }
+
+    createShape<T extends Shape<TProperties>, TProperties extends ShapeProperties>(
+        T: ShapeConstructor<TProperties, T>,
+        properties: Partial<TProperties> = {},
+    ): T {
+        const shape: T = new T(this, this.nextId++, properties);
+        this.shapes.set(shape, shape.layer);
         return shape;
     }
 
     getShape(id: number){
-        return this.shapes.get(id);
+        return this.shapes.getShape(id);
     }
-
-    getShapeLayer = (shape: Shape): number | undefined => {
-        return this.shapes.layerIndices()
-            .find(layer =>
-                this.shapes.shapesOnLayer(layer)
-                    .map(shape => shape.id)
-                    .indexOf(shape.id) >= 0
-            );
-    };
 
     public animate<T extends Shape>(shape: T){
         return new AnimationBuilder<T>(this, shape);
     }
-
-    public getShapesIntersecting = (coordinates: Coordinates): Shape[] => {
-        return [];
-    };
 
     // ToDo, make generic for "n" dimensions
     getShapesNear = (position: DirectionalMagnitude, radius?: number): NearbyShape[] => {
@@ -175,13 +162,8 @@ export class Stage {
         return result;
     };
 
-    removeShape(id: number | Shape): Stage {
-
-        if(id instanceof Shape){
-            return this.removeShape(id.id);
-        }
-
-        this.shapes.removeShape(id);
+    removeShape(shape: Shape): Stage {
+        this.shapes.removeShape(shape);
         return this;
     }
 

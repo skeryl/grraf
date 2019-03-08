@@ -1,8 +1,7 @@
 import {Shape} from "../shapes/Shape";
 import {Circle} from "../shapes/Circle";
 import {PhysicalProperties} from "./Simulation";
-import {Environment, NearbyParticle} from "./Environment";
-import {Coordinates} from "../Coordinates";
+import {Environment} from "./Environment";
 import {add, Direction, DirectionalMagnitude, ZERO} from "./DirectionalMagnitude";
 import {Rectangle} from "../shapes/Rectangle";
 
@@ -125,7 +124,7 @@ export class Particle implements IParticle {
         return this.shape.position;
     }
 
-    setPosition(coordinates: Coordinates) {
-        this.shape.setPosition(coordinates);
+    setPosition(position: DirectionalMagnitude) {
+        this.shape.setPosition(position);
     }
 }

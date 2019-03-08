@@ -1,13 +1,11 @@
 import {Example} from "../index";
 import {Stage} from "../../src/Stage";
 import {Rectangle} from "../../src/shapes/Rectangle";
-import {Color} from "../../src/color/Color";
+import {RadialGradient, LinearGradient, Color} from "../../src/color";
 import {Path} from "../../src/shapes/Path";
 import {DirectionalMagnitude} from "../../src/simulation/DirectionalMagnitude";
 import {MouseInfo} from "../../src/Mouse";
-import {Shape} from "../../src/shapes/Shape";
-import {LinearGradient} from "../../src/color/LinearGradient";
-import {RadialGradient} from "../../src/color/RadialGradient";
+import {Shape, ShapeProperties} from "../../src/shapes/Shape";
 
 const SEGMENT_LENGTH = 20;
 
@@ -28,13 +26,12 @@ export class AnchoredSquiggle extends Shape {
     private target: DirectionalMagnitude = { x: this.x + SEGMENT_LENGTH, y: this.y };
     private cpPosition: DirectionalMagnitude= { x: this.target.x, y: this.target.y };
 
-    constructor(stage: Stage, id: number, context: CanvasRenderingContext2D, x: number, y: number, color: Color) {
-        super(stage, id, context, x, y, color);
-
+    constructor(stage: Stage, id: number, properties: Partial<ShapeProperties>) {
+        super(stage, id, properties);
 
         this.path = this.stage.createShape(Path)
             .setLineCap("round")
-            .setStrokeColor(white) as Path;
+            .setStrokeStyle(white);
     }
 
     setTarget(x: number, y: number): AnchoredSquiggle {
@@ -52,7 +49,7 @@ export class AnchoredSquiggle extends Shape {
         this.path.moveTo(this.x, this.y)
             .quadraticCurveTo(this.target.x, this.target.y, this.x + SEGMENT_LENGTH, this.y)
             .setStrokeWidth(this.strokeWidth || 1)
-            .setStrokeColor(white);
+            .setStrokeStyle(white);
         this.path.drawShape();
     }
 }
@@ -75,25 +72,28 @@ export class SomethingPretty implements Example {
             y: (window.innerHeight - BORDER_HEIGHT) / 2,
         };
 
-        this.border = this.stage.createShape(Rectangle, startingPosition.x, startingPosition.y, white, -1)
-            .setHeight(BORDER_HEIGHT)
-            .setWidth(BORDER_WIDTH)
-            .setColor(
-                new RadialGradient(
-                    {x: startingPosition.x + (BORDER_WIDTH/2), y: startingPosition.y + (BORDER_HEIGHT/2) },
-                    5,
-                    startingPosition,
-                    Math.max(BORDER_WIDTH, BORDER_HEIGHT) * 1.15
-                )
-                    .addColorStop(aqua, 0)
-                    .addColorStop(pink, 1)
-            )
-            .setStrokeWidth(20)
-            .setStrokeColor(
-                new LinearGradient(startingPosition, {x: startingPosition.x + BORDER_WIDTH, y: startingPosition.y + BORDER_HEIGHT })
-                    .addColorStop(aqua, 0)
-                    .addColorStop(pink, 1)
-            );
+        const fill = new RadialGradient(
+            {x: startingPosition.x + (BORDER_WIDTH/2), y: startingPosition.y + (BORDER_HEIGHT/2) },
+            5,
+            startingPosition,
+            Math.max(BORDER_WIDTH, BORDER_HEIGHT) * 1.15
+        )
+            .addColorStop(aqua, 0)
+            .addColorStop(pink, 1);
+
+        const strokeStyle = new LinearGradient(startingPosition, {x: startingPosition.x + BORDER_WIDTH, y: startingPosition.y + BORDER_HEIGHT })
+            .addColorStop(aqua, 0)
+            .addColorStop(pink, 1);
+
+        this.border = this.stage.createShape(Rectangle, {
+            position: {x: startingPosition.x, y: startingPosition.y},
+            layer: -1,
+            width: BORDER_WIDTH,
+            height: BORDER_HEIGHT,
+            fill: Color.black,
+            strokeWidth: 20,
+            strokeStyle: strokeStyle
+        });
 
         const borderEdgeRight = BORDER_WIDTH + this.border.x;
         const borderEdgeDown = BORDER_HEIGHT + this.border.y;
@@ -136,7 +136,6 @@ export class SomethingPretty implements Example {
             this.mouse = mouse;
             window.requestAnimationFrame(this.redrawLines);
         });
-
     }
 
 
@@ -155,7 +154,6 @@ export class SomethingPretty implements Example {
             }
             this.stage.draw();
         }
-        // window.requestAnimationFrame(this.redrawLines);
     };
 
     stop(): void {
@@ -167,6 +165,5 @@ export class SomethingPretty implements Example {
     }
 
     name: string = "Pretty Stuff";
-
     description: string = "An example that shows interaction, many shapes, and animation.";
 }

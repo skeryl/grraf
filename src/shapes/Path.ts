@@ -1,5 +1,5 @@
 import {Shape} from "./Shape";
-import {Coordinates} from "../Coordinates";
+import {DirectionalMagnitude} from "../simulation/DirectionalMagnitude";
 
 export class Path extends Shape {
 
@@ -75,7 +75,7 @@ export class Path extends Shape {
         }
     }
 
-    public withinBounds(coordinates: Coordinates): boolean {
+    public withinBounds(coordinates: DirectionalMagnitude): boolean {
         return this.context.isPointInPath(this.path, coordinates.x, coordinates.y);
     }
 

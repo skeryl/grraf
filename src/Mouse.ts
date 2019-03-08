@@ -1,6 +1,5 @@
 import {FixedPool} from "./FixedPool";
-import {Coordinates} from "./Coordinates";
-import {add, DirectionalMagnitude, ZERO} from "./simulation/DirectionalMagnitude";
+import { add, DirectionalMagnitude, ZERO } from "./simulation/DirectionalMagnitude";
 
 function delta(a: number, b: number, timeMS: number): number {
     return (a - b) / timeMS;
@@ -65,7 +64,7 @@ export class MouseInfo {
         return this.deltas.elements().reduce(add, ZERO);
     }
 
-    position(): Coordinates {
+    position(): DirectionalMagnitude {
         return { x: this.x, y: this.y };
     }
 

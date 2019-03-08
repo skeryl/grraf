@@ -1,7 +1,12 @@
-import {Shape, SizeFunction} from "./Shape";
-import {Coordinates} from "../Coordinates";
+import {Shape, ShapeProperties, SizeFunction} from "./Shape";
+import {DirectionalMagnitude} from "../simulation/DirectionalMagnitude";
 
-export class Rectangle extends Shape {
+export interface RectangleProperties extends ShapeProperties {
+    width: number;
+    height: number;
+}
+
+export class Rectangle extends Shape<RectangleProperties> {
 
     private w: number = 5;
     private h: number = 5;
@@ -10,13 +15,13 @@ export class Rectangle extends Shape {
         return this.w;
     }
 
-    public setWidth = (w: number | SizeFunction): Rectangle => {
-        return this.setValue(w, "w") as Rectangle;
-    };
-
     height(): number {
         return this.h;
     }
+
+    public setWidth = (w: number | SizeFunction): Rectangle => {
+        return this.setValue(w, "w") as Rectangle;
+    };
 
     public setHeight = (h: number | SizeFunction): Rectangle => {
         return this.setValue(h, "h") as Rectangle;
@@ -26,7 +31,7 @@ export class Rectangle extends Shape {
         this.context.rect(this.x, this.y, this.w, this.h);
     }
 
-    public withinBounds(coordinates: Coordinates): boolean {
+    public withinBounds(coordinates: DirectionalMagnitude): boolean {
         const {x, y} = coordinates;
 
         const boundsRight = this.x + this.w;

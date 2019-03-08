@@ -1,4 +1,4 @@
-import {Shape} from "../shapes/Shape";
+import {Shape, ShapeProperties} from "../shapes/Shape";
 import {IParticle, Particle} from "./Particle";
 import {Distance, Stage} from "../Stage";
 import {Color} from "../color/Color";
@@ -15,9 +15,9 @@ export class ForceLine extends Shape {
     private particleB: IParticle | undefined;
     private distance: Distance | undefined;
 
-    constructor(stage: Stage, id: number, context: CanvasRenderingContext2D, x: number, y: number, color: Color) {
-        super(stage, id, context, x, y, color);
-        this.line = stage.createShape(Path).setColor(gray).setStrokeWidth(1).setStrokeColor(gray) as Path;
+    constructor(stage: Stage, id: number, initialProperties: Partial<ShapeProperties>) {
+        super(stage, id, initialProperties);
+        this.line = stage.createShape(Path).setColor(gray).setStrokeWidth(1).setStrokeStyle(gray) as Path;
     }
 
     setParticles(

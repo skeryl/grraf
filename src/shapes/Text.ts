@@ -1,5 +1,5 @@
 import {Shape, SizeFunction} from "./Shape";
-import {Coordinates} from "../Coordinates";
+import {DirectionalMagnitude} from "../simulation/DirectionalMagnitude";
 
 export class Text extends Shape {
 
@@ -29,10 +29,10 @@ export class Text extends Shape {
 
     drawShape(){
         this.context.font = `${this.fontFamily} ${this.fontSize}px`;
-        this.context.fillText(this.text, this.x, this.y, this.maxWidth);
+        this.context.fillText(this.text, this.position.x, this.position.y, this.maxWidth);
     }
 
-    public withinBounds(coords: Coordinates): boolean {
+    public withinBounds(coords: DirectionalMagnitude): boolean {
         const {x, y} = coords;
 
         const boundsRight = this.x + 10;

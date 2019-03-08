@@ -1,54 +1,113 @@
-import {Color} from "../color/Color";
-import {Coordinates} from "../Coordinates";
 import {MouseCallback, Stage} from "../Stage";
 import {DirectionalMagnitude} from "../simulation/DirectionalMagnitude";
-import {Fill, FillStyle} from "../color/FillStyle";
+import {FillStyle, Color} from "../color";
 
 export class SizeStrategy {
-
     public static fullHeight = (canvas?: HTMLCanvasElement) => canvas ? canvas.height : window.innerHeight;
-
     public static fullWidth = (canvas?: HTMLCanvasElement) => canvas ? canvas.width : window.innerWidth;
-
 }
 
 export type SizeFunction = (canvas: HTMLCanvasElement) => number;
 
-export class Shape {
+export interface ShapeProperties {
+    layer: number;
+    position: DirectionalMagnitude;
+    fill: FillStyle;
+    rotation?: number;
+    strokeStyle?: FillStyle;
+    strokeWidth?: number;
+}
 
-    public strokeColor: FillStyle | undefined;
-    public strokeWidth?: number;
+const DEFAULT_PROPERTIES: ShapeProperties = {
+    layer: 0,
+    position: {x: 0, y: 0 },
+    fill: Color.black,
+};
+
+export type ShapeConstructor<TProperties extends ShapeProperties, TShape extends Shape<TProperties>> = { new(stage: Stage, id: number, properties: Partial<TProperties>): TShape }
+
+export abstract class Shape<TProperties extends ShapeProperties = ShapeProperties> {
 
     private clippingSources: Shape[] = [];
     private readonly mouseUpdateCallbacks: Array<MouseCallback> = [];
     private readonly mouseClickCallbacks: Array<MouseCallback> = [];
     private listeningToClicks: boolean = false;
 
+    protected readonly context: CanvasRenderingContext2D;
+    public readonly properties: TProperties;
+
     constructor(
         public readonly stage: Stage,
         public readonly id: number,
-        protected readonly context: CanvasRenderingContext2D,
-        public x: number,
-        public y: number,
-        public color: FillStyle = new Color(),
-        private rotation?: number | undefined,
-    ){
+        initialProperties: Partial<TProperties>
+    ) {
         this.drawShape = this.drawShape.bind(this);
         this.isPathLike = this.isPathLike.bind(this);
+        this.context = stage.context;
+        this.properties = {
+            ...DEFAULT_PROPERTIES,
+            ...initialProperties,
+        } as TProperties;
     }
 
-    private listenToClicks(){
-        if(!this.listeningToClicks){
-            this.stage.onMouseClick(mouseInfo => {
-                if(this.withinBounds(mouseInfo.position())){
-                    this.mouseClickCallbacks.forEach(callback => callback(mouseInfo));
-                }
-            });
-            this.listeningToClicks = true;
-        }
+    public get x(): number {
+        return this.position.x;
+    }
+
+    public get y(): number {
+        return this.position.y;
+    }
+
+    public get layer(): number {
+        return this.properties.layer;
     };
 
-    public withinBounds(position: Coordinates): boolean {
+    public set layer(layer: number) {
+        this.stage.setShapeLayer(this, layer);
+        this.properties.layer = layer;
+    };
+
+    public get position(): DirectionalMagnitude {
+        return this.properties.position;
+    };
+
+    public set position(position: DirectionalMagnitude) {
+        this.properties.position = position;
+    }
+
+    public get rotation(): number | undefined {
+        return this.properties.rotation;
+    };
+
+    public set rotation(radians: number | undefined) {
+        this.properties.rotation = radians;
+    };
+
+    public get fill(): FillStyle {
+        return this.properties.fill;
+    };
+
+    public set fill(fill: FillStyle) {
+        this.properties.fill = fill;
+    };
+
+    public get strokeStyle(): FillStyle | undefined {
+        return this.properties.strokeStyle;
+    };
+
+    public set strokeStyle(stroke: FillStyle | undefined) {
+        this.properties.strokeStyle = stroke;
+    };
+
+    public get strokeWidth(): number | undefined {
+        return this.properties.strokeWidth;
+    };
+
+    public set strokeWidth(strokeWidth: number | undefined) {
+        this.properties.strokeWidth = strokeWidth;
+    };
+
+    public withinBounds(position: DirectionalMagnitude): boolean {
         return false;
     }
 
@@ -63,11 +122,6 @@ export class Shape {
         return this;
     }
 
-    // override if the shape is "path like" (started with context.beginPath() and closed with context.closePath())
-    protected isPathLike(){
-        return false;
-    }
-
     public hasClipping = (): boolean => {
         return this.clippingSources.length > 0;
     };
@@ -79,40 +133,25 @@ export class Shape {
     };
 
     public removeClipping = (clipper: Shape): this => {
-
         const clipIndex = this.clippingSources.findIndex(source => source.id === clipper.id);
-
         if(clipIndex >= 0){
             this.clippingSources.splice(clipIndex, 1);
         }
-
         return this;
     };
 
     public setClipping = (clipper: Shape): this => {
-
         // prevent the shape from being rendered normally
-        this.stage.removeShape(clipper.id);
-
+        this.stage.removeShape(clipper);
         // add it to this shape's clipping sources
         this.clippingSources.push(clipper);
         return this;
     };
 
-    public get position(): DirectionalMagnitude {
-        return { x: this.x, y: this.y };
+    // override if the shape is "path like" (started with context.beginPath() and closed with context.closePath())
+    protected isPathLike(){
+        return false;
     }
-
-    public set position(position: DirectionalMagnitude) {
-        this.x = position.x;
-        this.y = position.y;
-    }
-
-    public setPosition = (position: Coordinates): this => {
-        this.x = position.x;
-        this.y = position.y;
-        return this;
-    };
 
     protected setValue(n: number | SizeFunction, prop: string): this {
         if(typeof n === "number"){
@@ -130,8 +169,13 @@ export class Shape {
         return this;
     }
 
-    public setStrokeColor = (c: FillStyle): this => {
-        this.strokeColor = c;
+    public setPosition(position: DirectionalMagnitude): this {
+        this.position = position;
+        return this;
+    }
+
+    public setStrokeStyle = (c: FillStyle): this => {
+        this.strokeStyle = c;
         return this;
     };
 
@@ -140,14 +184,10 @@ export class Shape {
         return this;
     };
 
-    public setColor = (c: FillStyle): this => {
-        this.color = c;
+    public setColor = (fill: FillStyle): this => {
+        this.fill = fill;
         return this;
     };
-
-    public getColor(): FillStyle {
-        return this.color;
-    }
 
     public draw = () => {
         if(this.hasClipping()){
@@ -155,24 +195,24 @@ export class Shape {
         }
         this.context.save();
 
-        if(this.strokeColor){
-            this.context.strokeStyle = this.strokeColor.fillStyle(this.context);
+        if(this.strokeStyle){
+            this.context.strokeStyle = this.strokeStyle.fillStyle(this.context);
         }
         if (this.strokeWidth !== undefined) {
             this.context.lineWidth = this.strokeWidth;
         }
-        this.context.fillStyle = this.color.fillStyle(this.context);
+        this.context.fillStyle = this.fill.fillStyle(this.context);
 
         if(this.rotation !== undefined){
-            this.context.translate(this.x, this.y);
+            this.context.translate(this.position.x, this.position.y);
             this.context.rotate(this.rotation as any as number);
-            this.context.translate(-this.x, -this.y);
+            this.context.translate(-this.position.x, -this.position.y);
         }
 
         this.context.beginPath();
         this.drawShape();
         this.context.fill();
-        if(this.strokeColor !== undefined || this.strokeWidth !== undefined || this.constructor.name === "Path"){
+        if(this.strokeStyle !== undefined || this.strokeWidth !== undefined || this.constructor.name === "Path"){
             this.context.stroke();
         }
         this.context.closePath();
@@ -193,10 +233,21 @@ export class Shape {
         }
     };
 
-    rotate(r: number){
-        this.rotation = r;
+    public rotate(radians: number){
+        this.properties.rotation = radians;
         return this;
     }
 
     drawShape(){};
+
+    private listenToClicks(){
+        if(!this.listeningToClicks){
+            this.stage.onMouseClick(mouseInfo => {
+                if(this.withinBounds(mouseInfo.position())){
+                    this.mouseClickCallbacks.forEach(callback => callback(mouseInfo));
+                }
+            });
+            this.listeningToClicks = true;
+        }
+    };
 }

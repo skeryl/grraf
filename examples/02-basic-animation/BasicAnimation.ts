@@ -1,7 +1,7 @@
 import {Example} from "../index";
 import {Stage} from "../../src/Stage";
 import {Circle} from "../../src/shapes/Circle";
-import {Color} from "../../src/color/Color";
+import {Color} from "../../src/color";
 import {Animation, TimingFunction} from "../../src/Animation";
 
 const sexyPink = new Color(247, 24, 120);
@@ -26,7 +26,7 @@ export class BasicAnimation implements Example {
             }) as Circle;
 
         this.animation = this.stage.animate(circle)
-            .transition("color",
+            .transition("fill",
                 { 200: sexyPink, 2500: royalBlue, 4000: orangeJuice },
                 TimingFunction.EaseOutCubic
             )

@@ -1,7 +1,6 @@
 import {Environment, ForceMap, NearbyParticle} from "./Environment";
 import {IParticle, Particle} from "./Particle";
 import {add, Direction, DirectionalMagnitude, ZERO} from "./DirectionalMagnitude";
-import {ScalingMap} from "./ScalingMap";
 
 type ParticleStep = {
     netForce: DirectionalMagnitude;

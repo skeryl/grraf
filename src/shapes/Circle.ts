@@ -1,5 +1,5 @@
 import {Shape} from "./Shape";
-import {Coordinates} from "../Coordinates";
+import {DirectionalMagnitude} from "../simulation/DirectionalMagnitude";
 
 export class Circle extends Shape {
 
@@ -19,7 +19,7 @@ export class Circle extends Shape {
     };
 
 
-    public withinBounds(coords: Coordinates): boolean {
+    public withinBounds(coords: DirectionalMagnitude): boolean {
         const xDistance = coords.x - this.x;
         const yDistance = coords.y - this.y;
 
