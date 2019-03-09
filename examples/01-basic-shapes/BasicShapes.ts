@@ -1,7 +1,7 @@
 import {Example} from "../index";
 import {Stage} from "../../src/Stage";
 import {Rectangle} from "../../src/shapes/Rectangle";
-import {Color} from "../../src/color/Color";
+import {Color} from "../../src/color";
 import {Circle} from "../../src/shapes/Circle";
 import {Path} from "../../src/shapes/Path";
 
@@ -32,7 +32,7 @@ export class BasicShapes implements Example {
             // and set the x position of the center a "safe" distance from the rectangle
             // (note how we use the rectangle's dimensions in the calculation)
             .setPosition({
-                x: (rectangle.x + rectangle.width() + 10),
+                x: (rectangle.x + rectangle.width + 10),
                 y: rectangle.y
             }) as Circle;
 

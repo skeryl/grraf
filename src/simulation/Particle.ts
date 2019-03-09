@@ -51,7 +51,7 @@ export class Particle implements IParticle {
         if(this.shape instanceof Rectangle){
             const rect = this.shape as Rectangle;
 
-            const rightBound = position.x + (rect.width());
+            const rightBound = position.x + (rect.width);
             const leftBound = position.x;
 
             const leftOfRect = othersPosition.x < leftBound;
@@ -69,7 +69,7 @@ export class Particle implements IParticle {
 
                 return {
                     x: (othersPosition.x + (yDiff/Math.tan(Math.PI - theta))),
-                    y: (othersPosition.y < position.y) ? position.y : (position.y + rect.height()),
+                    y: (othersPosition.y < position.y) ? position.y : (position.y + rect.height),
                 };
             }
         }
