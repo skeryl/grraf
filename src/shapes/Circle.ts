@@ -1,9 +1,19 @@
-import {Shape} from "./Shape";
+import {Shape, ShapeProperties} from "./Shape";
 import {DirectionalMagnitude} from "../simulation/DirectionalMagnitude";
 
-export class Circle extends Shape {
+export interface CircleProperties extends ShapeProperties {
+    radius: number;
+}
 
-    public radius: number = 0;
+export class Circle extends Shape<CircleProperties> {
+
+    public get radius(): number {
+        return this.properties.radius;
+    };
+
+    public set radius(radius: number){
+        this.properties.radius = radius;
+    };
 
     protected isPathLike(): boolean {
         return true;
