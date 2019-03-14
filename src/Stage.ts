@@ -48,8 +48,18 @@ export class Stage {
 
     public readonly canvas: HTMLCanvasElement;
 
+    public static createOffscreen(canvasSettings?: Partial<HTMLCanvasElement>, resizeWithWindow: boolean = false, doc = document): Stage {
+        const canvas = doc.createElement('canvas');
+        if(canvasSettings){
+            Object.keys(canvasSettings).forEach(key => {
+                (canvas as any)[key] = (canvasSettings as any)[key];
+            });
+        }
+        return new Stage(canvas, resizeWithWindow);
+    }
+
     constructor(canvasOrContainer: HTMLCanvasElement | (HTMLElement | null),
-                public readonly fullscreen: boolean = false,
+                public readonly resizeWithWindow: boolean = false,
                 private readonly extraHeight: number = 0
     ){
         this.canvas = (canvasOrContainer instanceof HTMLCanvasElement) ? canvasOrContainer : createCanvas(canvasOrContainer as HTMLElement);
@@ -79,7 +89,7 @@ export class Stage {
 
     onResize = () => {
 
-        if(this.fullscreen){
+        if(this.resizeWithWindow){
             this.canvas.height = window.innerHeight + this.extraHeight;
             this.canvas.width = window.innerWidth;
         }
@@ -174,6 +184,10 @@ export class Stage {
             height: this.canvas.height,
             width: this.canvas.width
         };
+    }
+
+    drawStage(otherStage: Stage, destinationOffset: DirectionalMagnitude = { x: 0, y: 0 }): void {
+        this.context.drawImage(otherStage.canvas, destinationOffset.x, destinationOffset.y);
     }
 
     draw(){

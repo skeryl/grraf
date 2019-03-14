@@ -1,6 +1,7 @@
 import {Stage} from "../src/Stage";
 import {Rectangle} from "../src/shapes/Rectangle";
 import {getTestStage} from "./testUtils";
+import {Color} from "../src/color";
 
 describe("Stage", function () {
 
@@ -30,6 +31,32 @@ describe("Stage", function () {
 
         const rectById = stage.getShape(rectangle.id);
         expect(rectangle).toBe(rectById);
+    });
+
+    // ToDo: fix this
+    describe('createOffscreen', () => {
+        test(`should create a Stage which doesn't inherently draw to the main canvas.`, () => {
+            const { stage, container } = getTestStage();
+
+            const offscreenStage = Stage.createOffscreen(undefined, false, container.ownerDocument as Document);
+
+            offscreenStage.createShape(Rectangle, {
+                width: 10, height: 10,
+                strokeStyle: Color.transparent,
+                fill: Color.black,
+                position: { x: 0, y: 0 }
+            });
+
+            const redValue = stage.context.getImageData(2, 2, 1, 1).data[0];
+            expect(redValue).toBe(0);
+
+            stage.drawStage(offscreenStage);
+            stage.draw();
+
+            const imageData = stage.context.getImageData(2, 2, 1, 1).data;
+            const redValueAfter = imageData[0];
+            expect(redValueAfter).toBe(255);
+        });
     });
 
 });
