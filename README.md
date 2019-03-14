@@ -36,7 +36,7 @@ stage.draw();
 ```javascript
 // (^ continued from previous code snippet ^)
 
-//  animate a shape by defining transitions for a property (setting values for specific key-frames and an optional timing function)
+//  animate a shape by defining transitions for a property (setting values for specific key-frames)
 const animation = stage.animate(circle)
     // these values are also typed based on the property!!!
     .transition("fill",
