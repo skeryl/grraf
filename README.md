@@ -48,10 +48,10 @@ const animation = stage.animate(circle)
     )
     .transition("radius",
         {
-               0: maxSize / 16,
-            1500: maxSize / 8,
-            2500: maxSize / 4,
-            4000: maxSize / 16
+               0: 20, // at 0 seconds, radius is 20 pixels
+            1500: 40, // at 1.5 seconds, the radius is 40 pixels (etc)
+            2500: 80,
+            4000: 20
         },
         TimingFunction.EaseInOutCubic // timing functions may be used
     )
