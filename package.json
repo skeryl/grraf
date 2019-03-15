@@ -1,12 +1,12 @@
 {
   "name": "grraf",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "description": "A visualization and graphing library written in TypeScript",
   "repository": "https://github.com/skeryl/grraf.git",
   "main": "dist/lib/index.js",
   "types": "dist/lib/index.d.ts",
   "scripts": {
-    "prepublish": "npm run build",
+    "prepare": "npm run build",
     "build": "tsc --declaration",
     "build-examples": "webpack",
     "watch-examples": "webpack --watch",
