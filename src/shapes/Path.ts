@@ -63,6 +63,14 @@ export class Path extends Shape {
         return this;
     }
 
+    setPath(path: Path2D){
+        this.path = path;
+    }
+
+    setPathData(pathData: string){
+        this.path = new Path2D(pathData);
+    }
+
     drawShape() {
         if(this.lineCapType){
             this.context.lineCap = this.lineCapType;
