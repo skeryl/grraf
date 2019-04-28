@@ -17,6 +17,7 @@ interface AnimationTransition<T, K extends keyof T> {
 export interface AnimationParams {
     runTime: number;
     repeat: boolean;
+    manualDraw: boolean;
 }
 
 type PropertyTransitionFrames<Value> = {
@@ -106,7 +107,6 @@ export class Animation {
         private readonly params: Partial<AnimationParams>,
         private readonly transitions: AnimationTransition<any, any>[]
     ) {
-
     }
 
     private cancelled: boolean = false;
@@ -146,7 +146,9 @@ export class Animation {
             return false;
         }).reduce((result: boolean, itemIsFinished: boolean) => result && itemIsFinished, true);
 
-        this.stage.draw();
+        if(!this.params.manualDraw){
+            this.stage.draw();
+        }
 
         if(isFinished){
             this.complete();
@@ -179,7 +181,9 @@ export class Animation {
         const ease: EaseFunc = Animation.Easing[transition.timingFunction];
         const percent = ease(pctComplete);
         transition.shape[transition.key] = Animation.getIntermediateValue(transition.startValue, transition.endValue, percent);
-        this.stage.draw();
+        if(!this.params.manualDraw){
+            this.stage.draw();
+        }
     };
 
     private static getIntermediateValue<T, K extends keyof T>(startValue: T[K], endValue: T[K], percent: number): T[K] {

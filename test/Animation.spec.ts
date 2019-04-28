@@ -68,4 +68,29 @@ describe('Animation', () => {
         });
 
     });
+
+    describe('manualDraw', () => {
+        test('should not call "draw" on the stage when true', (done) => {
+            const { stage } = getTestStage();
+
+            const drawSpy = jest.spyOn(stage, "draw");
+
+            const circle = stage.createShape(Circle)
+                .setPosition({ x: 0, y: 0 });
+
+            const animation = stage.animate(circle)
+                .transition('position', {
+                    0: { x: 0, y: 0 },
+                    100: { x: 10, y: 10 },
+                }).create({ manualDraw: true });
+
+            animation.then(() => {
+                expect(drawSpy).not.toHaveBeenCalled();
+                expect(circle.position).toEqual({ x: 10, y: 10 });
+                done();
+            });
+
+            animation.start();
+        });
+    });
 });

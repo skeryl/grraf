@@ -63,12 +63,13 @@ export class Path extends Shape {
         return this;
     }
 
-    setPath(path: Path2D){
+    setPath(path: Path2D): this{
         this.path = path;
+        return this;
     }
 
-    setPathData(pathData: string){
-        this.path = new Path2D(pathData);
+    setPathData(pathData: string): this {
+        return this.setPath(new Path2D(pathData));
     }
 
     drawShape() {
