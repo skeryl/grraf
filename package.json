@@ -1,6 +1,6 @@
 {
   "name": "grraf",
-  "version": "1.0.15",
+  "version": "1.0.16",
   "description": "A visualization and graphing library written in TypeScript",
   "repository": "https://github.com/skeryl/grraf.git",
   "main": "dist/lib/index.js",
