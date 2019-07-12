@@ -11,13 +11,14 @@ export class ShapeStore {
     };
 
     public getShape = (shapeId: number): Shape | undefined => {
+        let foundShape : Shape | undefined = undefined;
         this.layers.forEach(layer => {
             const shape = layer.get(shapeId);
             if(shape){
-                return shape;
+                foundShape = shape;
             }
         });
-        return undefined;
+        return foundShape;
     };
 
     public set = (shape: Shape, layerIndex: number = 0): ShapeStore => {
@@ -62,7 +63,7 @@ export class ShapeStore {
             .forEach(layerIndex => {
                 const layer = this.layers.get(layerIndex);
                 if(layer){
-                    const shapes = layer.forEach(shape => {
+                    layer.forEach(shape => {
                         action(shape);
                     });
                 }
